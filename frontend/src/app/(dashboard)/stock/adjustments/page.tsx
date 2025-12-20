@@ -192,11 +192,10 @@ export default function StockAdjustmentsPage() {
                   min="1"
                   step="1"
                   value={formData.qtyChange || ''}
-                  placeholder="Enter quantity"
                   onChange={(e) => setFormData({ ...formData, qtyChange: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  required
                   placeholder="Enter quantity"
+                  required
                 />
               </div>
               <div>

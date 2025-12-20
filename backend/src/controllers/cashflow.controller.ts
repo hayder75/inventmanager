@@ -39,7 +39,7 @@ export async function getCashFlow(req: AuthRequest, res: Response) {
 
       if (consistentBalanceSetting?.value === 'true' && consistentBalanceAmount) {
         // Check if this setting was enabled before or on this date
-        const settingEnabledDate = new Date(consistentBalanceSetting.createdAt);
+        const settingEnabledDate = new Date(consistentBalanceSetting.updatedAt);
         settingEnabledDate.setHours(0, 0, 0, 0);
         if (targetDate >= settingEnabledDate) {
           openingBalance = new Decimal(consistentBalanceAmount.value);

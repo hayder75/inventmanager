@@ -11,9 +11,12 @@ export interface TokenPayload {
 }
 
 export function generateToken(payload: TokenPayload): string {
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined');
+  }
   return jwt.sign(payload, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN,
-  });
+  } as jwt.SignOptions);
 }
 
 export function verifyToken(token: string): TokenPayload {
