@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 241, 245, 248;
+  --background-end-rgb: 241, 245, 248;
+  --primary-color: #0082FB;
+  --primary-dark: #0064E0;
+  --accent-color: #A5CE00;
+  --background-color: #F1F5F8;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: #F1F5F8;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Dynamic primary color */
+[style*="--primary-color"] {
+  --tw-primary: var(--primary-color);
+}
+
+/* Print Styles */
+@media print {
+  @page {
+    margin: 0.5cm;
+  }
+  
+  /* Hide navigation and non-essential elements when printing */
+  nav,
+  aside,
+  button:not(.print-keep),
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure proper page breaks */
+  .page-break {
+    page-break-after: always;
+  }
+  
+  /* Better print layout */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
+
