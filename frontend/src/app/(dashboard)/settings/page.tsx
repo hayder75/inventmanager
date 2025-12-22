@@ -12,6 +12,7 @@ interface SystemSettings {
   commission_percentage: string;
   consistent_daily_opening_balance_enabled: string;
   consistent_daily_opening_balance_amount: string;
+  login_access_code: string;
 }
 
 interface Salesperson {
@@ -36,6 +37,7 @@ export default function SettingsPage() {
     commission_percentage: '0',
     consistent_daily_opening_balance_enabled: 'false',
     consistent_daily_opening_balance_amount: '0',
+    login_access_code: 'REALBRIGHT2025',
   });
   const [systemSaved, setSystemSaved] = useState(false);
   const [salespeople, setSalespeople] = useState<Salesperson[]>([]);
@@ -62,6 +64,7 @@ export default function SettingsPage() {
         commission_percentage: response.data.commission_percentage || '0',
         consistent_daily_opening_balance_enabled: response.data.consistent_daily_opening_balance_enabled || 'false',
         consistent_daily_opening_balance_amount: response.data.consistent_daily_opening_balance_amount || '0',
+        login_access_code: response.data.login_access_code || 'REALBRIGHT2025',
       });
     } catch (error) {
       console.error('Failed to fetch system settings:', error);
@@ -142,6 +145,7 @@ export default function SettingsPage() {
         { key: 'commission_rate', value: systemSettings.commission_percentage },
         { key: 'consistent_daily_opening_balance_enabled', value: systemSettings.consistent_daily_opening_balance_enabled },
         { key: 'consistent_daily_opening_balance_amount', value: systemSettings.consistent_daily_opening_balance_amount },
+        { key: 'login_access_code', value: systemSettings.login_access_code },
       ];
       
       for (const setting of settingsToUpdate) {
@@ -386,6 +390,35 @@ export default function SettingsPage() {
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Login Access Code Setting */}
+          <div className="border-b border-gray-200 pb-4">
+            <div className="mb-2">
+              <label className="text-sm font-medium text-gray-900">
+                Login Access Code
+              </label>
+              <p className="text-xs text-gray-500 mt-1">
+                Access code required to access the login page. Share this code with authorized staff members only.
+              </p>
+            </div>
+            <div className="mt-3">
+              <input
+                type="text"
+                value={systemSettings.login_access_code}
+                onChange={(e) =>
+                  setSystemSettings({
+                    ...systemSettings,
+                    login_access_code: e.target.value,
+                  })
+                }
+                className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg"
+                placeholder="Enter access code"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Users must enter this code before they can see the login form.
+              </p>
+            </div>
           </div>
 
           {/* Save System Settings Button */}

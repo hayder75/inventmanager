@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
-
-const CORRECT_ACCESS_CODE = 'REALBRIGHT2025'; // Change this to something secure
+import api from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,20 +14,32 @@ export default function LoginPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [accessCode, setAccessCode] = useState('');
   const [accessError, setAccessError] = useState('');
+  const [verifyingCode, setVerifyingCode] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [error, setError] = useState('');
 
-  const handleAccessCode = (e: React.FormEvent) => {
+  const handleAccessCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (accessCode === CORRECT_ACCESS_CODE) {
-      setShowLogin(true);
-      setAccessError('');
-    } else {
-      setAccessError('Invalid access code. Please try again.');
+    setVerifyingCode(true);
+    setAccessError('');
+
+    try {
+      const response = await api.post('/api/auth/verify-access-code', { accessCode });
+      if (response.data.valid) {
+        setShowLogin(true);
+        setAccessError('');
+      } else {
+        setAccessError('Invalid access code. Please try again.');
+        setAccessCode('');
+      }
+    } catch (err: any) {
+      setAccessError(err.response?.data?.error || 'Invalid access code. Please try again.');
       setAccessCode('');
+    } finally {
+      setVerifyingCode(false);
     }
   };
 
@@ -94,10 +105,18 @@ export default function LoginPage() {
             </div>
             <button
               type="submit"
-              className="w-full py-3 px-4 rounded-lg text-white font-medium transition-all hover:opacity-90"
+              disabled={verifyingCode}
+              className="w-full py-3 px-4 rounded-lg text-white font-medium transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: '#0082FB' }}
             >
-              Continue
+              {verifyingCode ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Verifying...
+                </div>
+              ) : (
+                'Continue'
+              )}
             </button>
           </form>
           <div className="mt-6 text-center text-sm text-gray-500">

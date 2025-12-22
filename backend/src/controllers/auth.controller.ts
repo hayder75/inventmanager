@@ -134,4 +134,31 @@ export async function verify(req: any, res: Response) {
   }
 }
 
+export async function verifyAccessCode(req: Request, res: Response) {
+  try {
+    const { accessCode } = req.body;
+
+    if (!accessCode) {
+      return res.status(400).json({ error: 'Access code is required' });
+    }
+
+    // Get access code from database settings
+    const setting = await prisma.setting.findUnique({
+      where: { key: 'login_access_code' },
+    });
+
+    // Default access code if not set in database
+    const correctCode = setting?.value || 'REALBRIGHT2025';
+
+    if (accessCode === correctCode) {
+      res.json({ valid: true });
+    } else {
+      res.status(401).json({ valid: false, error: 'Invalid access code' });
+    }
+  } catch (error: any) {
+    console.error('Verify access code error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 
