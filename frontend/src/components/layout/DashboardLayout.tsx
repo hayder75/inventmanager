@@ -25,6 +25,7 @@ import {
   BarChart3,
   DollarSign,
   TrendingDown,
+  Globe,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -50,6 +51,7 @@ const adminMenuItems: MenuItem[] = [
   { name: 'Expense Reports', href: '/expenses/reports', icon: FileText, roles: ['ADMIN'] },
   { name: 'Sales Performance', href: '/dashboard/performance', icon: BarChart3, roles: ['ADMIN'] },
   { name: 'Users', href: '/users', icon: Users, roles: ['ADMIN'] },
+  { name: 'Website', href: '/website', icon: Globe, roles: ['ADMIN'] },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 

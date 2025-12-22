@@ -5,16 +5,32 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 
+const CORRECT_ACCESS_CODE = 'REALBRIGHT2025'; // Change this to something secure
+
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [accessCode, setAccessCode] = useState('');
+  const [accessError, setAccessError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [error, setError] = useState('');
+
+  const handleAccessCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (accessCode === CORRECT_ACCESS_CODE) {
+      setShowLogin(true);
+      setAccessError('');
+    } else {
+      setAccessError('Invalid access code. Please try again.');
+      setAccessCode('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +52,61 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Show access code screen first
+  if (!showLogin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+          <div className="mb-6 text-center">
+            <h1 className="text-3xl font-bold mb-2" style={{ color: '#0064E0' }}>
+              Real-Bright-Trading
+            </h1>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Staff Access</h2>
+            <p className="text-gray-600">
+              Please enter the access code to continue
+            </p>
+          </div>
+          <form onSubmit={handleAccessCode} className="space-y-4">
+            {accessError && (
+              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-200">
+                {accessError}
+              </div>
+            )}
+            <div>
+              <label htmlFor="accessCode" className="block text-sm font-medium text-gray-700 mb-2">
+                Access Code
+              </label>
+              <input
+                id="accessCode"
+                type="password"
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAccessCode(e);
+                  }
+                }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                placeholder="Enter access code"
+                autoFocus
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-3 px-4 rounded-lg text-white font-medium transition-all hover:opacity-90"
+              style={{ backgroundColor: '#0082FB' }}
+            >
+              Continue
+            </button>
+          </form>
+          <div className="mt-6 text-center text-sm text-gray-500">
+            <p>© 2025 Real-Bright-Trading. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">

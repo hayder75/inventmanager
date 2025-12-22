@@ -15,6 +15,7 @@ import expensesRoutes from './routes/expenses.routes';
 import cashflowRoutes from './routes/cashflow.routes';
 import profitlossRoutes from './routes/profitloss.routes';
 import settingsRoutes from './routes/settings.routes';
+import websiteRoutes from './routes/website.routes';
 
 dotenv.config();
 
@@ -46,6 +47,7 @@ app.use('/api/expenses', expensesRoutes);
 app.use('/api/cash-flow', cashflowRoutes);
 app.use('/api/profit-loss', profitlossRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/website', websiteRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
