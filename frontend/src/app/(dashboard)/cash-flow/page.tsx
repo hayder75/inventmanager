@@ -168,25 +168,25 @@ export default function CashFlowPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col space-y-3 md:flex-row md:justify-between md:items-center md:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Cash Flow Management</h1>
-          <p className="text-gray-600 mt-1">Track daily cash flow and expenses</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Cash Flow Management</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">Track daily cash flow and expenses</p>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <Calendar className="h-5 w-5 text-gray-500" />
+        <div className="flex flex-col space-y-2 md:flex-row md:items-center md:space-y-0 md:space-x-4">
+          <div className="flex items-center space-x-2 w-full md:w-auto">
+            <Calendar className="h-5 w-5 text-gray-500 flex-shrink-0" />
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg"
+              className="flex-1 md:w-auto px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
             />
           </div>
           <button
             onClick={() => setShowExpenseModal(true)}
-            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            className="flex items-center justify-center px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-[44px] w-full md:w-auto"
           >
             <Plus className="h-5 w-5 mr-2" />
             Add Expense
@@ -197,117 +197,117 @@ export default function CashFlowPage() {
       {cashFlow && (
         <>
           {/* Summary Cards */}
-          <div className={`grid grid-cols-1 md:grid-cols-${user?.role === 'ADMIN' ? '6' : '5'} gap-4`}>
-            <div className="bg-white rounded-lg shadow p-6">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.role === 'ADMIN' ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-3 md:gap-4`}>
+            <div className="bg-white rounded-lg shadow p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Opening Balance</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs md:text-sm text-gray-600">Opening Balance</p>
+                  <p className="text-lg md:text-2xl font-bold text-gray-900 mt-1 truncate">
                     {formatCurrency(cashFlow.openingBalance)}
                   </p>
                   {openingBalance && (
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 mt-1 truncate">
                       {openingBalance.notes && `Note: ${openingBalance.notes}`}
                     </p>
                   )}
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 ml-2 flex-shrink-0">
                   {user?.role === 'ADMIN' && (
                     <button
                       onClick={() => setShowOpeningBalanceModal(true)}
-                      className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                      className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 min-h-[44px]"
                     >
                       {openingBalance ? 'Edit' : 'Set'}
                     </button>
                   )}
-                  <div className="p-3 bg-blue-100 rounded-lg">
-                    <DollarSign className="h-6 w-6 text-blue-600" />
+                  <div className="p-2 md:p-3 bg-blue-100 rounded-lg">
+                    <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Cash Sales</p>
-                  <p className="text-2xl font-bold text-green-600 mt-1">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs md:text-sm text-gray-600">Cash Sales</p>
+                  <p className="text-lg md:text-2xl font-bold text-green-600 mt-1 truncate">
                     {formatCurrency(cashFlow.cashSales)}
                   </p>
                 </div>
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-green-600" />
+                <div className="p-2 md:p-3 bg-green-100 rounded-lg ml-2 flex-shrink-0">
+                  <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-green-600" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Bank Deposits</p>
-                  <p className="text-2xl font-bold text-blue-600 mt-1">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs md:text-sm text-gray-600">Bank Deposits</p>
+                  <p className="text-lg md:text-2xl font-bold text-blue-600 mt-1 truncate">
                     {formatCurrency(cashFlow.bankDeposits)}
                   </p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-blue-600" />
+                <div className="p-2 md:p-3 bg-blue-100 rounded-lg ml-2 flex-shrink-0">
+                  <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
                 </div>
               </div>
             </div>
 
             {user?.role === 'ADMIN' && (
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow p-4 md:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Surplus Revenue</p>
-                    <p className="text-2xl font-bold text-purple-600 mt-1">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs md:text-sm text-gray-600">Surplus Revenue</p>
+                    <p className="text-lg md:text-2xl font-bold text-purple-600 mt-1 truncate">
                       {formatCurrency(cashFlow.surplus || '0')}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">From price overrides</p>
                   </div>
-                  <div className="p-3 bg-purple-100 rounded-lg">
-                    <TrendingUp className="h-6 w-6 text-purple-600" />
+                  <div className="p-2 md:p-3 bg-purple-100 rounded-lg ml-2 flex-shrink-0">
+                    <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-purple-600" />
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Expenses</p>
-                  <p className="text-2xl font-bold text-red-600 mt-1">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs md:text-sm text-gray-600">Expenses</p>
+                  <p className="text-lg md:text-2xl font-bold text-red-600 mt-1 truncate">
                     {formatCurrency(cashFlow.expenses)}
                   </p>
                 </div>
-                <div className="p-3 bg-red-100 rounded-lg">
-                  <TrendingDown className="h-6 w-6 text-red-600" />
+                <div className="p-2 md:p-3 bg-red-100 rounded-lg ml-2 flex-shrink-0">
+                  <TrendingDown className="h-5 w-5 md:h-6 md:w-6 text-red-600" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Total Cash Available</p>
-                  <p className="text-2xl font-bold text-blue-600 mt-1">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs md:text-sm text-gray-600">Total Cash Available</p>
+                  <p className="text-lg md:text-2xl font-bold text-blue-600 mt-1 truncate">
                     {formatCurrency(cashFlow.totalAmount || (parseFloat(cashFlow.openingBalance) + parseFloat(cashFlow.cashSales) + parseFloat(cashFlow.bankDeposits) - parseFloat(cashFlow.expenses)).toString())}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 mt-1 hidden md:block">
                     Opening: {formatCurrency(cashFlow.openingBalance)} + Cash Sales: {formatCurrency(cashFlow.cashSales)} + Bank: {formatCurrency(cashFlow.bankDeposits)} - Expenses: {formatCurrency(cashFlow.expenses)}
                   </p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <DollarSign className="h-6 w-6 text-blue-600" />
+                <div className="p-2 md:p-3 bg-blue-100 rounded-lg ml-2 flex-shrink-0">
+                  <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Breakdown */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Cash Flow Breakdown</h2>
-            <div className="grid grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow p-4 md:p-6">
+            <h2 className="text-base md:text-lg font-semibold mb-4">Cash Flow Breakdown</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <h3 className="text-sm font-medium text-gray-700 mb-2">Cash In</h3>
                 <div className="space-y-2">
@@ -355,10 +355,12 @@ export default function CashFlowPage() {
 
           {/* Today's Expenses */}
           <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold">Today's Expenses</h2>
+            <div className="p-4 md:p-6 border-b border-gray-200">
+              <h2 className="text-base md:text-lg font-semibold">Today's Expenses</h2>
             </div>
-            <div className="overflow-x-auto">
+            
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
@@ -415,9 +417,42 @@ export default function CashFlowPage() {
                   ))}
                 </tbody>
               </table>
-              {expenses.length === 0 && (
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden">
+              {expenses.length === 0 ? (
                 <div className="p-6 text-center text-gray-500">
                   No expenses recorded for this date
+                </div>
+              ) : (
+                <div className="p-4 space-y-3">
+                  {expenses.map((expense) => (
+                    <div key={expense.id} className="border border-gray-200 rounded-lg p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-900">
+                          {expense.expenseType.replace('_', ' ')}
+                        </span>
+                        <span className="text-base font-semibold text-red-600">
+                          {formatCurrency(expense.amount)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600">{expense.description}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{new Date(expense.expenseDate).toLocaleDateString()}</span>
+                        <span
+                          className={`px-2 py-1 rounded ${
+                            expense.paymentMethod === 'CASH'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}
+                        >
+                          {expense.paymentMethod === 'CASH' ? 'Cash' : 'Bank Transfer'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400">Added by: {expense.creator.name}</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

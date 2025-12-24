@@ -123,24 +123,22 @@ export default function SalesPerformancePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Sales Performance</h1>
-          <p className="text-gray-600 mt-1">Detailed performance by salesperson - {getFilterLabel()}</p>
-        </div>
+    <div className="space-y-4 md:space-y-6">
+      <div>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Sales Performance</h1>
+        <p className="text-sm md:text-base text-gray-600 mt-1">{getFilterLabel()}</p>
       </div>
 
       {/* Filter Buttons */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex items-center space-x-4">
+      <div className="bg-white rounded-lg shadow p-3 md:p-4">
+        <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-4">
           <label className="text-sm font-medium text-gray-700">Filter:</label>
-          <div className="flex space-x-2 flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {(['all', 'daily', 'weekly', 'monthly', 'yearly'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                className={`px-4 py-2.5 rounded-lg text-sm font-medium min-h-[44px] ${
                   filter === f
                     ? 'bg-primary-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -151,19 +149,20 @@ export default function SalesPerformancePage() {
             ))}
           </div>
           {filter !== 'all' && (
-            <div className="ml-4">
+            <div className="w-full md:w-auto">
               <input
                 type="date"
                 value={selectedDate.toISOString().split('T')[0]}
                 onChange={(e) => setSelectedDate(new Date(e.target.value))}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                className="w-full md:w-auto px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
               />
             </div>
           )}
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden lg:block bg-white rounded-lg shadow overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -202,7 +201,7 @@ export default function SalesPerformancePage() {
                     {parseFloat(perf.commission) > 0 && (
                       <button
                         onClick={() => handleResetCommission(perf.salespersonId, perf.salespersonName)}
-                        className="flex items-center px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+                        className="flex items-center px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 min-h-[44px]"
                         title="Reset Commission"
                       >
                         <RotateCcw className="h-4 w-4 mr-1" />
@@ -215,6 +214,66 @@ export default function SalesPerformancePage() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {performance.length === 0 ? (
+          <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+            No sales performance data available. Create some sales to see performance metrics.
+          </div>
+        ) : (
+          performance.map((perf) => (
+            <div key={perf.salespersonId} className="bg-white rounded-lg shadow p-4 space-y-3">
+              <div className="flex items-center justify-between border-b pb-3">
+                <h3 className="text-lg font-bold text-gray-900">{perf.salespersonName}</h3>
+                {parseFloat(perf.commission) > 0 && (
+                  <button
+                    onClick={() => handleResetCommission(perf.salespersonId, perf.salespersonName)}
+                    className="flex items-center px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 min-h-[44px]"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-1" />
+                    Reset
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-gray-500">Bills</p>
+                  <p className="text-base font-semibold">{perf.bills}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Total Sold</p>
+                  <p className="text-base font-semibold text-gray-900">{formatCurrency(perf.totalSold)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Cash</p>
+                  <p className="text-base font-medium">{formatCurrency(perf.cash)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Bank</p>
+                  <p className="text-base font-medium">{formatCurrency(perf.bank)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Credit Given</p>
+                  <p className="text-base font-medium text-yellow-600">{formatCurrency(perf.creditGiven)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Commission</p>
+                  <p className="text-base font-semibold text-green-600">{formatCurrency(perf.commission)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Extra from Override</p>
+                  <p className="text-base font-medium text-green-600">{formatCurrency(perf.extraFromOverride)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Profit Contributed</p>
+                  <p className="text-base font-semibold text-primary-600">{formatCurrency(perf.profitContributed)}</p>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
