@@ -2,32 +2,32 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Eye, EyeOff, Upload, X, Image as ImageIcon, Sparkles } from 'lucide-react';
 
-interface PublicProduct {
+interface Product {
   id: string;
   name: string;
+  code: string | null;
   description: string | null;
   imageUrl: string | null;
-  price: number | null;
+  sellingPrice: number;
   category: string | null;
-  isActive: boolean;
-  displayOrder: number;
+  stockQty: number;
+  showOnWebsite: boolean;
+  isNew: boolean;
+  notes: string | null;
 }
 
 export default function WebsiteManagementPage() {
-  const [products, setProducts] = useState<PublicProduct[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<PublicProduct | null>(null);
   const [formData, setFormData] = useState({
-    name: '',
     description: '',
-    price: '',
-    category: '',
-    displayOrder: '0',
     image: null as File | null,
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -44,69 +44,85 @@ export default function WebsiteManagementPage() {
     }
   };
 
+  const handleToggleVisibility = async (productId: string) => {
+    try {
+      const response = await api.patch(`/api/website/admin/products/${productId}/toggle-visibility`);
+      setProducts(products.map(p => p.id === productId ? response.data : p));
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Failed to toggle visibility');
+    }
+  };
+
+  const handleToggleNewStatus = async (productId: string) => {
+    try {
+      const response = await api.patch(`/api/website/admin/products/${productId}/toggle-new`);
+      setProducts(products.map(p => p.id === productId ? response.data : p));
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Failed to toggle new status');
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingProduct) return;
+
     const formDataToSend = new FormData();
-    formDataToSend.append('name', formData.name);
     formDataToSend.append('description', formData.description);
-    formDataToSend.append('price', formData.price);
-    formDataToSend.append('category', formData.category);
-    formDataToSend.append('displayOrder', formData.displayOrder);
     if (formData.image) {
       formDataToSend.append('image', formData.image);
     }
 
     try {
-      if (editingProduct) {
-        await api.put(`/api/website/admin/products/${editingProduct.id}`, formDataToSend, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-      } else {
-        await api.post('/api/website/admin/products', formDataToSend, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-      }
+      await api.put(`/api/website/admin/products/${editingProduct.id}/website`, formDataToSend, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       fetchProducts();
       resetForm();
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to save product');
+      alert(error.response?.data?.error || 'Failed to update product');
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+  const handleDeleteImage = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product image?')) return;
     try {
-      await api.delete(`/api/website/admin/products/${id}`);
+      await api.delete(`/api/website/admin/products/${productId}/image`);
       fetchProducts();
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to delete product');
+      alert(error.response?.data?.error || 'Failed to delete image');
     }
+  };
+
+  const startEdit = (product: Product) => {
+    setEditingProduct(product);
+    setFormData({
+      description: product.description || '',
+      image: null,
+    });
+    setImagePreview(product.imageUrl ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${product.imageUrl}` : null);
+    setShowForm(true);
   };
 
   const resetForm = () => {
     setFormData({
-      name: '',
       description: '',
-      price: '',
-      category: '',
-      displayOrder: '0',
       image: null,
     });
+    setImagePreview(null);
     setEditingProduct(null);
     setShowForm(false);
-  };
-
-  const startEdit = (product: PublicProduct) => {
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      description: product.description || '',
-      price: product.price?.toString() || '',
-      category: product.category || '',
-      displayOrder: product.displayOrder.toString(),
-      image: null,
-    });
-    setShowForm(true);
   };
 
   if (loading) {
@@ -122,36 +138,14 @@ export default function WebsiteManagementPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Website Management</h1>
-          <p className="text-gray-600 mt-1">Manage products displayed on your public website</p>
+          <p className="text-gray-600 mt-1">Manage which inventory products appear on your public website</p>
         </div>
-        <button
-          onClick={() => {
-            resetForm();
-            setShowForm(true);
-          }}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Add Product
-        </button>
       </div>
 
-      {showForm && (
+      {showForm && editingProduct && (
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">
-            {editingProduct ? 'Edit Product' : 'Add Product'}
-          </h2>
+          <h2 className="text-xl font-semibold mb-4">Edit Product: {editingProduct.name}</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Name *</label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg"
-              />
-            </div>
             <div>
               <label className="block text-sm font-medium mb-1">Description</label>
               <textarea
@@ -159,61 +153,39 @@ export default function WebsiteManagementPage() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-3 py-2 border rounded-lg"
                 rows={3}
+                placeholder="Product description for website..."
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Price</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Category</label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Product Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+              {imagePreview && (
+                <div className="mt-4 relative">
+                  <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImagePreview(null);
+                      setFormData({ ...formData, image: null });
+                    }}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Display Order</label>
-                <input
-                  type="number"
-                  value={formData.displayOrder}
-                  onChange={(e) => setFormData({ ...formData, displayOrder: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
-            </div>
-            {editingProduct && editingProduct.imageUrl && (
-              <div>
-                <label className="block text-sm font-medium mb-1">Current Image</label>
-                <img src={editingProduct.imageUrl} alt={editingProduct.name} className="w-32 h-32 object-cover rounded" />
-              </div>
-            )}
             <div className="flex gap-2">
               <button
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                {editingProduct ? 'Update' : 'Create'}
+                Update
               </button>
               <button
                 type="button"
@@ -232,17 +204,19 @@ export default function WebsiteManagementPage() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">New</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {products.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                  No products yet. Click "Add Product" to get started.
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                  No products found in inventory.
                 </td>
               </tr>
             ) : (
@@ -250,7 +224,11 @@ export default function WebsiteManagementPage() {
                 <tr key={product.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {product.imageUrl ? (
-                      <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded" />
+                      <img 
+                        src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${product.imageUrl}`} 
+                        alt={product.name} 
+                        className="w-16 h-16 object-cover rounded" 
+                      />
                     ) : (
                       <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
                         <ImageIcon className="w-8 h-8 text-gray-400" />
@@ -259,31 +237,76 @@ export default function WebsiteManagementPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                    {product.code && (
+                      <div className="text-sm text-gray-500">Code: {product.code}</div>
+                    )}
+                    {product.category && (
+                      <div className="text-sm text-gray-500">Category: {product.category}</div>
+                    )}
                     {product.description && (
-                      <div className="text-sm text-gray-500">{product.description.substring(0, 50)}...</div>
+                      <div className="text-sm text-gray-500 mt-1">{product.description.substring(0, 50)}...</div>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.price ? `$${parseFloat(product.price.toString()).toFixed(2)}` : '-'}
+                    ${parseFloat(product.sellingPrice.toString()).toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {product.stockQty}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs rounded-full ${product.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {product.isActive ? 'Active' : 'Inactive'}
-                    </span>
+                    <button
+                      onClick={() => handleToggleVisibility(product.id)}
+                      className={`px-3 py-1 text-xs rounded-full flex items-center gap-1 ${
+                        product.showOnWebsite 
+                          ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      }`}
+                    >
+                      {product.showOnWebsite ? (
+                        <>
+                          <Eye className="w-4 h-4" />
+                          Visible
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="w-4 h-4" />
+                          Hidden
+                        </>
+                      )}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => handleToggleNewStatus(product.id)}
+                      className={`px-3 py-1 text-xs rounded-full flex items-center gap-1 ${
+                        product.isNew 
+                          ? 'bg-brand text-white hover:bg-brand-dark' 
+                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      }`}
+                    >
+                      <Sparkles className={`w-4 h-4 ${product.isNew ? 'text-white' : 'text-gray-600'}`} />
+                      {product.isNew ? 'New' : 'Mark as New'}
+                    </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => startEdit(product)}
-                      className="text-blue-600 hover:text-blue-900 mr-4"
-                    >
-                      <Edit className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => startEdit(product)}
+                        className="text-blue-600 hover:text-blue-900"
+                        title="Edit"
+                      >
+                        <Upload className="w-5 h-5" />
+                      </button>
+                      {product.imageUrl && (
+                        <button
+                          onClick={() => handleDeleteImage(product.id)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Delete Image"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -294,4 +317,3 @@ export default function WebsiteManagementPage() {
     </div>
   );
 }
-

@@ -122,6 +122,10 @@ model Product {
   lowStockAlert Int      @default(10) @map("low_stock_alert")
   stockQty      Int      @default(0) @map("stock_qty")
   notes         String?  @db.Text
+  description   String?  @db.Text // Website description
+  imageUrl      String?  @map("image_url") // Path to uploaded image for website
+  showOnWebsite Boolean  @default(false) @map("show_on_website") // Toggle visibility on website
+  isNew         Boolean  @default(false) @map("is_new") // Mark as new arrival
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 

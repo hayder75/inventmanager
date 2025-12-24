@@ -3,29 +3,24 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 241, 245, 248;
-  --background-end-rgb: 241, 245, 248;
-  --primary-color: #0082FB;
-  --primary-dark: #0064E0;
-  --accent-color: #A5CE00;
-  --background-color: #F1F5F8;
+  --foreground-rgb: 15, 23, 42; /* Slate 900 */
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 248, 250, 252; /* Slate 50 */
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: #F1F5F8;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
-/* Dynamic primary color */
-[style*="--primary-color"] {
-  --tw-primary: var(--primary-color);
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  font-feature-settings: "rlig" 1, "calt" 1; /* Optimize font rendering */
 }
 
 /* Print Styles */
