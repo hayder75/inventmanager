@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 import api from '@/lib/api';
+
+const ACCESS_CODE_VERIFIED_KEY = 'access_code_verified';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,6 +23,14 @@ export default function LoginPage() {
   });
   const [error, setError] = useState('');
 
+  // Check if access code was already verified
+  useEffect(() => {
+    const isVerified = localStorage.getItem(ACCESS_CODE_VERIFIED_KEY);
+    if (isVerified === 'true') {
+      setShowLogin(true);
+    }
+  }, []);
+
   const handleAccessCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setVerifyingCode(true);
@@ -29,6 +39,8 @@ export default function LoginPage() {
     try {
       const response = await api.post('/api/auth/verify-access-code', { accessCode });
       if (response.data.valid) {
+        // Save verification to localStorage so they don't need to enter it again
+        localStorage.setItem(ACCESS_CODE_VERIFIED_KEY, 'true');
         setShowLogin(true);
         setAccessError('');
       } else {
@@ -119,6 +131,18 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.removeItem(ACCESS_CODE_VERIFIED_KEY);
+                setShowLogin(false);
+              }}
+              className="text-xs text-gray-400 hover:text-gray-600 underline"
+            >
+              Clear saved access code
+            </button>
+          </div>
           <div className="mt-6 text-center text-sm text-gray-500">
             <p>© 2025 Real-Bright-Trading. All rights reserved.</p>
           </div>
