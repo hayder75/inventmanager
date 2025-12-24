@@ -69,6 +69,62 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
       new Decimal(0)
     );
 
+    // Today's expenses
+    const todayExpenses = await prisma.expense.findMany({
+      where: {
+        expenseDate: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+    });
+    const totalExpenses = todayExpenses.reduce(
+      (sum, expense) => sum.plus(expense.amount),
+      new Decimal(0)
+    );
+
+    // Total products count
+    const totalProducts = await prisma.product.count();
+
+    // Total sales count today
+    const totalBills = todaySales.length;
+
+    // Recent sales (last 5)
+    const recentSales = await prisma.sale.findMany({
+      take: 5,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        salesperson: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    // Total customers/contacts
+    const totalContacts = await prisma.contact.count();
+
+    // Pending credit (total credit not yet paid)
+    // Get all sales with credit and calculate remaining credit
+    const allSalesWithCredit = await prisma.sale.findMany({
+      where: {
+        totalCredit: {
+          gt: 0,
+        },
+      },
+    });
+    const totalPendingCredit = allSalesWithCredit.reduce(
+      (sum, sale) => {
+        // Remaining credit = total credit - total paid
+        const remainingCredit = sale.totalCredit.minus(sale.totalPaid);
+        return remainingCredit.gt(0) ? sum.plus(remainingCredit) : sum;
+      },
+      new Decimal(0)
+    );
+
     res.json({
       today: {
         totalSales: totalSales.toString(),
@@ -76,6 +132,13 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
         bankCollected: bankCollected.toString(),
         creditSales: creditSales.toString(),
         profit: profit.toString(),
+        expenses: totalExpenses.toString(),
+        bills: totalBills,
+      },
+      overview: {
+        totalProducts: totalProducts,
+        totalContacts: totalContacts,
+        pendingCredit: totalPendingCredit.toString(),
       },
       lowStockAlerts: lowStockProducts.length,
       lowStockProducts: lowStockProducts.map(p => ({
@@ -83,6 +146,12 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
         name: p.name,
         stockQty: p.stockQty,
         lowStockAlert: p.lowStockAlert,
+      })),
+      recentSales: recentSales.map(sale => ({
+        id: sale.id,
+        totalAmount: sale.totalAmount.toString(),
+        createdAt: sale.createdAt.toISOString(),
+        salespersonName: sale.salesperson.name,
       })),
     });
   } catch (error: any) {
