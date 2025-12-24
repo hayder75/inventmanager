@@ -138,8 +138,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     onClick={() => setSidebarOpen(false)}
                     className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                       active
-                        ? 'bg-primary-500 text-white'
-                        : 'text-gray-200 hover:bg-primary-500/30 hover:text-white'
+                        ? 'bg-blue-400 text-white shadow-md'
+                        : 'text-gray-200 hover:bg-blue-400/30 hover:text-white'
                     }`}
                   >
                     <Icon className="mr-3 h-5 w-5" />
@@ -153,8 +153,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* User info */}
           <div className="border-t border-gray-800 p-4">
             <div className="flex items-center mb-3">
-              <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center">
-                <span className="text-sm font-medium">
+              <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center shadow-md">
+                <span className="text-sm font-medium text-white">
                   {user?.name?.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -193,7 +193,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center shadow-md">
                   <span className="text-xs font-medium text-white">
                     {user?.name?.charAt(0).toUpperCase()}
                   </span>
