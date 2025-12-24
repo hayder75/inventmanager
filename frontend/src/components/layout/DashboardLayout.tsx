@@ -115,19 +115,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-800">
-            <h1 className="text-xl font-bold">Real-Bright-Trading</h1>
+          <div className="flex items-center justify-between h-14 md:h-16 px-3 md:px-4 border-b border-gray-800">
+            <h1 className="text-base md:text-xl font-bold truncate">Real-Bright-Trading</h1>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-gray-400 hover:text-white"
+              className="lg:hidden text-gray-400 hover:text-white p-1"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5 md:h-6 md:w-6" />
             </button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto py-4">
-            <div className="px-2 space-y-1">
+          <nav className="flex-1 overflow-y-auto py-2 md:py-4">
+            <div className="px-1 md:px-2 space-y-1">
               {filteredMenuItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
@@ -136,14 +136,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     key={item.href}
                     href={item.href}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                    className={`flex items-center px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm font-medium rounded-lg transition-colors ${
                       active
                         ? 'bg-blue-400 text-white shadow-md'
                         : 'text-gray-200 hover:bg-blue-400/30 hover:text-white'
                     }`}
                   >
-                    <Icon className="mr-3 h-5 w-5" />
-                    {item.name}
+                    <Icon className="mr-2 md:mr-3 h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                    <span className="truncate">{item.name}</span>
                   </Link>
                 );
               })}
@@ -151,23 +151,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* User info */}
-          <div className="border-t border-gray-800 p-4">
-            <div className="flex items-center mb-3">
-              <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center shadow-md">
-                <span className="text-sm font-medium text-white">
+          <div className="border-t border-gray-800 p-3 md:p-4">
+            <div className="flex items-center mb-2 md:mb-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-400 flex items-center justify-center shadow-md flex-shrink-0">
+                <span className="text-xs md:text-sm font-medium text-white">
                   {user?.name?.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <div className="ml-3 flex-1">
-                <p className="text-sm font-medium">{user?.name}</p>
+              <div className="ml-2 md:ml-3 flex-1 min-w-0">
+                <p className="text-xs md:text-sm font-medium truncate">{user?.name}</p>
                 <p className="text-xs text-gray-400">{user?.role}</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              className="w-full flex items-center justify-center px-3 md:px-4 py-2 text-xs md:text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
             >
-              <LogOut className="mr-3 h-4 w-4" />
+              <LogOut className="mr-2 md:mr-3 h-3 w-3 md:h-4 md:w-4" />
               Logout
             </button>
           </div>
@@ -178,28 +178,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="lg:pl-64">
         {/* Top bar */}
         <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
-          <div className="flex items-center justify-between h-16 px-4">
+          <div className="flex items-center justify-between h-14 md:h-16 px-3 md:px-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
+              className="lg:hidden text-gray-500 hover:text-gray-700 p-1"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5 md:h-6 md:w-6" />
             </button>
 
-
-            <div className="flex items-center space-x-4">
-              <button className="text-gray-500 hover:text-gray-700 relative">
-                <Bell className="h-6 w-6" />
+            <div className="flex items-center space-x-2 md:space-x-4">
+              <button className="text-gray-500 hover:text-gray-700 relative p-1">
+                <Bell className="h-5 w-5 md:h-6 md:w-6" />
                 <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center shadow-md">
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-blue-400 flex items-center justify-center shadow-md">
                   <span className="text-xs font-medium text-white">
                     {user?.name?.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium">{user?.name}</p>
+                <div className="hidden sm:block text-left">
+                  <p className="text-xs md:text-sm font-medium">{user?.name}</p>
                   <p className="text-xs text-gray-500">{user?.role}</p>
                 </div>
               </div>
@@ -208,9 +207,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page content */}
-        <main className="p-6 relative min-h-screen pb-20">{children}</main>
-        {/* Easy Tech Branding */}
-        <div className="fixed bottom-4 right-4 z-10">
+        <main className="p-3 sm:p-4 md:p-6 relative min-h-screen pb-20">{children}</main>
+        {/* Easy Tech Branding - Hidden on mobile */}
+        <div className="hidden md:block fixed bottom-4 right-4 z-10">
           <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-200">
             <p className="text-lg font-bold" style={{ color: '#0082FB' }}>
               Easy Tech
