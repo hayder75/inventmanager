@@ -124,6 +124,9 @@ export async function deleteProduct(req: AuthRequest, res: Response) {
         stockEntries: {
           take: 1,
         },
+        stockAdjustments: {
+          take: 1,
+        },
       },
     });
 
@@ -131,16 +134,29 @@ export async function deleteProduct(req: AuthRequest, res: Response) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // Check if product has been used in sales or stock entries
+    // Check if product has been used in sales
     if (product.saleItems.length > 0) {
       return res.status(400).json({ 
         error: 'Cannot delete product that has been used in sales. Consider marking it as inactive instead.' 
       });
     }
 
-    // Delete the product (cascade will handle related records)
-    await prisma.product.delete({
-      where: { id },
+    // Delete related records first (in a transaction)
+    await prisma.$transaction(async (tx) => {
+      // Delete stock adjustments
+      await tx.stockAdjustment.deleteMany({
+        where: { productId: id },
+      });
+
+      // Delete stock entries
+      await tx.stockEntry.deleteMany({
+        where: { productId: id },
+      });
+
+      // Now delete the product
+      await tx.product.delete({
+        where: { id },
+      });
     });
 
     res.json({ message: 'Product deleted successfully' });
@@ -149,7 +165,12 @@ export async function deleteProduct(req: AuthRequest, res: Response) {
     if (error.code === 'P2025') {
       return res.status(404).json({ error: 'Product not found' });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    if (error.code === 'P2003') {
+      return res.status(400).json({ 
+        error: 'Cannot delete product due to existing relationships. Please contact support.' 
+      });
+    }
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 }
 
