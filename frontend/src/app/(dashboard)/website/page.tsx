@@ -13,6 +13,7 @@ interface Product {
   sellingPrice: number;
   category: string | null;
   stockQty: number;
+  unit: string | null;
   showOnWebsite: boolean;
   isNew: boolean;
   notes: string | null;
@@ -248,10 +249,15 @@ export default function WebsiteManagementPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${parseFloat(product.sellingPrice.toString()).toFixed(2)}
+                    <div>${parseFloat(product.sellingPrice.toString()).toFixed(2)}</div>
+                    {product.unit && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        per {product.unit === 'pak' ? 'pack' : product.unit === 'pcs' ? 'piece' : product.unit}
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.stockQty}
+                    {product.stockQty} {product.unit || 'units'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button

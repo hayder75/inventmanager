@@ -50,6 +50,7 @@ export async function getPublicProducts(req: any, res: Response) {
         sellingPrice: true,
         category: true,
         stockQty: true,
+        unit: true,
       },
     });
     // Transform to match frontend expectations
@@ -61,6 +62,7 @@ export async function getPublicProducts(req: any, res: Response) {
       price: product.sellingPrice,
       category: product.category,
       stockQty: product.stockQty,
+      unit: product.unit,
     }));
     res.json(transformedProducts);
   } catch (error: any) {
@@ -85,6 +87,7 @@ export async function getNewProducts(req: any, res: Response) {
         sellingPrice: true,
         category: true,
         stockQty: true,
+        unit: true,
         createdAt: true,
       },
     });
@@ -95,6 +98,7 @@ export async function getNewProducts(req: any, res: Response) {
       description: product.description,
       imageUrl: product.imageUrl,
       price: product.sellingPrice,
+      unit: product.unit,
       category: product.category,
       stockQty: product.stockQty,
       createdAt: product.createdAt,

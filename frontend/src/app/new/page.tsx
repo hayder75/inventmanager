@@ -15,6 +15,7 @@ interface Product {
     price: number | null;
     category: string | null;
     stockQty: number;
+    unit: string | null;
     createdAt: string;
 }
 

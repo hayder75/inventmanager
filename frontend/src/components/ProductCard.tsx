@@ -7,11 +7,12 @@ interface ProductCardProps {
     imageUrl: string | null;
     price: number | null;
     category: string | null;
+    unit: string | null;
 }
 
 export default function ProductCard({ product }: { product: ProductCardProps }) {
     return (
-        <div className="group bg-white rounded-2xl overflow-hidden border border-primary-100 hover:border-brand-light/50 transition-all duration-300 hover:shadow-card hover:-translate-y-1">
+        <div className="group bg-white rounded-2xl overflow-hidden border-2 border-primary-200 hover:border-brand-light/50 transition-all duration-300 hover:shadow-card hover:-translate-y-1 shadow-sm">
             {/* Image Container - Only show if image exists */}
             {product.imageUrl && (
                 <div className="relative h-64 w-full bg-primary-50 overflow-hidden">
@@ -47,11 +48,18 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
                     <h3 className="text-lg font-bold text-primary-900 line-clamp-1 group-hover:text-brand transition-colors">
                         {product.name}
                     </h3>
-                    {product.price && (
-                        <span className="text-lg font-bold text-brand">
-                            ${parseFloat(product.price.toString()).toFixed(2)}
-                        </span>
-                    )}
+                    <div className="text-right">
+                        {product.price && (
+                            <span className="text-lg font-bold text-brand block">
+                                ${parseFloat(product.price.toString()).toFixed(2)}
+                            </span>
+                        )}
+                        {product.unit && (
+                            <span className="text-xs text-primary-500 font-medium uppercase">
+                                per {product.unit === 'pak' ? 'pack' : product.unit === 'pcs' ? 'piece' : product.unit}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {product.description && (

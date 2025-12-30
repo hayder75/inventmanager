@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Facebook, Twitter, Instagram, Mail, Phone, MapPin, ShoppingBag } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Mail, Phone, MapPin, ShoppingBag, MessageCircle } from 'lucide-react';
 
 export default function Footer() {
     return (
@@ -56,34 +56,28 @@ export default function Footer() {
                         <h3 className="text-lg font-bold mb-6">Contact Us</h3>
                         <ul className="space-y-4">
                             <li className="flex items-start gap-3 text-primary-300">
-                                <MapPin size={20} className="text-brand-light shrink-0" />
-                                <span>123 Business Avenue, Tech District, City, Country</span>
+                                <MapPin size={20} className="text-brand-light shrink-0 mt-0.5" />
+                                <span>Hawassa, Ethiopia</span>
                             </li>
-                            <li className="flex items-center gap-3 text-primary-300">
-                                <Phone size={20} className="text-brand-light shrink-0" />
-                                <span>+1 (555) 123-4567</span>
+                            <li>
+                                <a href="tel:0916581946" className="flex items-center gap-3 text-primary-300 hover:text-brand-light transition-colors">
+                                    <Phone size={20} className="text-brand-light shrink-0" />
+                                    <span>0916581946 / 0993939599</span>
+                                </a>
                             </li>
-                            <li className="flex items-center gap-3 text-primary-300">
-                                <Mail size={20} className="text-brand-light shrink-0" />
-                                <span>info@realbright.com</span>
+                            <li>
+                                <a href="mailto:Realbrightwondyrad@gmail.com" className="flex items-center gap-3 text-primary-300 hover:text-brand-light transition-colors">
+                                    <Mail size={20} className="text-brand-light shrink-0" />
+                                    <span>Realbrightwondyrad@gmail.com</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://wa.me/251916581946" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-primary-300 hover:text-brand-light transition-colors">
+                                    <MessageCircle size={20} className="text-brand-light shrink-0" />
+                                    <span>0916581946 (WhatsApp/Telegram)</span>
+                                </a>
                             </li>
                         </ul>
-                    </div>
-
-                    {/* Newsletter */}
-                    <div>
-                        <h3 className="text-lg font-bold mb-6">Newsletter</h3>
-                        <p className="text-primary-300 mb-4">Subscribe to get the latest updates and offers.</p>
-                        <form className="flex flex-col gap-3">
-                            <input
-                                type="email"
-                                placeholder="Enter your email"
-                                className="px-4 py-3 bg-primary-800 border border-primary-700 rounded-lg text-white placeholder-primary-400 focus:outline-none focus:border-brand transition-colors"
-                            />
-                            <button className="px-4 py-3 bg-brand text-white rounded-lg font-medium hover:bg-brand-dark transition-colors">
-                                Subscribe
-                            </button>
-                        </form>
                     </div>
                 </div>
 
