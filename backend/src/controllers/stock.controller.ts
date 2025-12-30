@@ -9,6 +9,7 @@ interface StockEntryInput {
   productCode?: string;
   category?: string;
   quantity: number;
+  unit?: string; // 'pack', 'pcs', 'reem', etc.
   costPrice: number;
   sellingPrice?: number;
   batchNumber?: string;
@@ -73,10 +74,35 @@ export async function addStock(req: AuthRequest, res: Response) {
 
           productId = newProduct.id;
         } else {
+          // Get existing product to check current unit
+          const existingProduct = await tx.product.findUnique({ where: { id: productId } });
+          if (!existingProduct) {
+            throw new Error(`Product ${productId} not found`);
+          }
+
+          // Calculate quantity increment based on unit
+          let quantityToAdd = entry.quantity;
+          const entryUnit = entry.unit || existingProduct.unit || 'pcs';
+          
+          // If adding in pieces but product is in packs, convert
+          if (entryUnit.toLowerCase() === 'pcs' && existingProduct.unit && existingProduct.unit.toLowerCase() === 'pak') {
+            const piecesPerUnit = existingProduct.piecesPerUnit || 10;
+            quantityToAdd = Math.ceil(entry.quantity / piecesPerUnit); // Convert pieces to packs
+          }
+          // If adding in packs but product is in pieces, convert
+          else if (entryUnit.toLowerCase() === 'pak' && existingProduct.unit && existingProduct.unit.toLowerCase() === 'pcs') {
+            const piecesPerUnit = 10; // Default conversion
+            quantityToAdd = entry.quantity * piecesPerUnit; // Convert packs to pieces
+          }
+          // If units match or product has no unit, use as-is
+          else if (entryUnit.toLowerCase() === existingProduct.unit?.toLowerCase() || !existingProduct.unit) {
+            quantityToAdd = entry.quantity;
+          }
+
           // Update existing product stock
           const updateData: any = {
             stockQty: {
-              increment: entry.quantity,
+              increment: quantityToAdd,
             },
           };
           // Always update prices when adding stock
@@ -85,6 +111,18 @@ export async function addStock(req: AuthRequest, res: Response) {
           }
           if (entry.sellingPrice && entry.sellingPrice > 0) {
             updateData.sellingPrice = new Decimal(entry.sellingPrice);
+          }
+          // Update unit if provided and different
+          if (entry.unit && entry.unit !== existingProduct.unit) {
+            updateData.unit = entry.unit;
+            // Update piecesPerUnit based on new unit
+            if (entry.unit.toLowerCase() === 'pak' || entry.unit.toLowerCase() === 'pack') {
+              updateData.piecesPerUnit = 10;
+            } else if (entry.unit.toLowerCase() === 'reem') {
+              updateData.piecesPerUnit = 500;
+            } else {
+              updateData.piecesPerUnit = 1;
+            }
           }
           await tx.product.update({
             where: { id: productId },
