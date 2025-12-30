@@ -47,11 +47,24 @@ export async function addStock(req: AuthRequest, res: Response) {
             ? entry.sellingPrice 
             : (entry.costPrice > 0 ? entry.costPrice * 1.5 : 0);
           
+          // Determine piecesPerUnit based on the unit
+          let piecesPerUnit = 1;
+          const unit = entry.unit || 'pcs';
+          if (unit.toLowerCase() === 'pak' || unit.toLowerCase() === 'pack') {
+            piecesPerUnit = 10; // Default: 1 pack = 10 pieces
+          } else if (unit.toLowerCase() === 'reem') {
+            piecesPerUnit = 500; // 1 reem = 500 pieces
+          } else if (unit.toLowerCase() === 'set') {
+            piecesPerUnit = 1;
+          }
+
           const newProduct = await tx.product.create({
             data: {
               name: entry.productName,
               code: entry.productCode || null,
               category: entry.category || null,
+              unit: unit,
+              piecesPerUnit: piecesPerUnit,
               costPrice: new Decimal(entry.costPrice),
               sellingPrice: new Decimal(calculatedSellingPrice),
               stockQty: entry.quantity,

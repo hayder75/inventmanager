@@ -11,6 +11,7 @@ interface StockEntry {
   productCode?: string;
   category?: string;
   quantity: number;
+  unit?: string; // 'pack' or 'pcs' or other
   costPrice: number;
   sellingPrice?: number;
   batchNumber?: string;
@@ -26,6 +27,7 @@ export default function AddStockPage() {
   const [entries, setEntries] = useState<StockEntry[]>([
     {
       quantity: 1,
+      unit: 'pcs',
       costPrice: 0,
       sellingPrice: 0,
       supplierName: undefined,
@@ -39,6 +41,7 @@ export default function AddStockPage() {
       ...entries,
       {
         quantity: 1,
+        unit: 'pcs',
         costPrice: 0,
         sellingPrice: 0,
         supplierName: undefined,
@@ -132,6 +135,22 @@ export default function AddStockPage() {
                       className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
                       required
                     />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Unit *</label>
+                    <select
+                      value={entry.unit || 'pcs'}
+                      onChange={(e) => updateEntry(index, { unit: e.target.value })}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                      required
+                    >
+                      <option value="pcs">Pieces</option>
+                      <option value="pak">Pack</option>
+                      <option value="reem">Reem</option>
+                      <option value="set">Set</option>
+                      <option value="roll">Roll</option>
+                      <option value="pair">Pair</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Cost Price *</label>

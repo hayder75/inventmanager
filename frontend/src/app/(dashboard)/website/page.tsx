@@ -249,10 +249,17 @@ export default function WebsiteManagementPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div>${parseFloat(product.sellingPrice.toString()).toFixed(2)}</div>
-                    {product.unit && (
+                    <div className="flex items-center gap-2">
+                      <span>${parseFloat(product.sellingPrice.toString()).toFixed(2)}</span>
+                      {product.unit && product.unit.toLowerCase() === 'pak' && (
+                        <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded-full uppercase">
+                          Pack
+                        </span>
+                      )}
+                    </div>
+                    {product.unit && product.unit.toLowerCase() !== 'pak' && (
                       <div className="text-xs text-gray-500 mt-1">
-                        per {product.unit === 'pak' ? 'pack' : product.unit === 'pcs' ? 'piece' : product.unit}
+                        per {product.unit === 'pcs' ? 'piece' : product.unit}
                       </div>
                     )}
                   </td>

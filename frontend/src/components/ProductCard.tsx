@@ -49,16 +49,23 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
                         {product.name}
                     </h3>
                     <div className="text-right">
-                        {product.price && (
+                    {product.price && (
+                        <div>
                             <span className="text-lg font-bold text-brand block">
                                 ${parseFloat(product.price.toString()).toFixed(2)}
                             </span>
-                        )}
-                        {product.unit && (
-                            <span className="text-xs text-primary-500 font-medium uppercase">
-                                per {product.unit === 'pak' ? 'pack' : product.unit === 'pcs' ? 'piece' : product.unit}
-                            </span>
-                        )}
+                            {product.unit && product.unit.toLowerCase() === 'pak' && (
+                                <span className="inline-block mt-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded-full uppercase">
+                                    Pack Price
+                                </span>
+                            )}
+                            {product.unit && product.unit.toLowerCase() !== 'pak' && (
+                                <span className="text-xs text-primary-500 font-medium uppercase block mt-1">
+                                    per {product.unit === 'pcs' ? 'piece' : product.unit}
+                                </span>
+                            )}
+                        </div>
+                    )}
                     </div>
                 </div>
 

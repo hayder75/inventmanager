@@ -790,6 +790,9 @@ video {
 .mt-8 {
   margin-top: 2rem;
 }
+.ml-8 {
+  margin-left: 2rem;
+}
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;
@@ -1698,6 +1701,10 @@ video {
   padding-top: 2rem;
   padding-bottom: 2rem;
 }
+.py-0\.5 {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
 .pb-20 {
   padding-bottom: 5rem;
 }
@@ -1967,6 +1974,10 @@ video {
 .text-yellow-800 {
   --tw-text-opacity: 1;
   color: rgb(133 77 14 / var(--tw-text-opacity, 1));
+}
+.text-orange-700 {
+  --tw-text-opacity: 1;
+  color: rgb(194 65 12 / var(--tw-text-opacity, 1));
 }
 .underline {
   text-decoration-line: underline;
