@@ -477,22 +477,24 @@ async function main() {
         const unitLower = (item.unit || existing.unit || 'pcs').toLowerCase();
         let piecesPerUnit = existing.piecesPerUnit || 1;
         if (!existing.piecesPerUnit || existing.piecesPerUnit === 1) {
-          if (unitLower === 'pack') piecesPerUnit = 10;
+          if (unitLower === 'pack' || unitLower === 'pak') piecesPerUnit = 10;
           else if (unitLower === 'reem') piecesPerUnit = 500;
           else if (unitLower === 'set') piecesPerUnit = 1;
           else piecesPerUnit = 1;
         }
         
-        // Update existing product
+        // Update existing product - always use item.unit if provided, otherwise keep existing
+        const finalUnit = item.unit || existing.unit || 'pcs';
         product = await prisma.product.update({
           where: { id: existing.id },
           data: {
-            unit: item.unit || existing.unit || 'pcs',
+            unit: finalUnit,
             piecesPerUnit: piecesPerUnit as number,
             stockQty: { increment: item.quantity },
             costPrice: new Decimal(item.costPrice),
             sellingPrice: new Decimal(item.sellingPrice),
             category: item.category,
+            showOnWebsite: true, // Ensure it's shown on website
           },
         });
       } else {
@@ -501,7 +503,7 @@ async function main() {
         // Common defaults: pack=10, reem=500, set=varies, pcs=1
         const unitLower = (item.unit || 'pcs').toLowerCase();
         let piecesPerUnit = 1;
-        if (unitLower === 'pack') piecesPerUnit = 10; // Default 10 pieces per pack
+        if (unitLower === 'pack' || unitLower === 'pak') piecesPerUnit = 10; // Default 10 pieces per pack
         else if (unitLower === 'reem') piecesPerUnit = 500; // Default 500 sheets per reem
         else if (unitLower === 'set') piecesPerUnit = 1; // Sets vary, default 1
         else if (unitLower === 'pcs' || unitLower === 'pc' || unitLower === 'piece') piecesPerUnit = 1;
