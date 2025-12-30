@@ -126,6 +126,7 @@ export async function getAllPublicProducts(req: AuthRequest, res: Response) {
         sellingPrice: true,
         category: true,
         stockQty: true,
+        unit: true,
         showOnWebsite: true,
         isNew: true,
         notes: true,
