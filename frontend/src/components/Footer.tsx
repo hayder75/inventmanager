@@ -74,8 +74,9 @@ export default function Footer() {
                             <li>
                                 <a href="https://wa.me/251916581946" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-primary-300 hover:text-brand-light transition-colors">
                                     <MessageCircle size={20} className="text-brand-light shrink-0" />
-                                    <span>0916581946 (WhatsApp/Telegram)</span>
+                                    <span>0916581946</span>
                                 </a>
+                                <span className="text-xs text-primary-400 ml-8">WhatsApp/Telegram</span>
                             </li>
                         </ul>
                     </div>
