@@ -109,7 +109,7 @@ export default function AddStockPage() {
           <div className="space-y-4">
             {entries.map((entry, index) => (
               <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-3">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Product Name/Code
