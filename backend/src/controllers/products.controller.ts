@@ -110,4 +110,74 @@ export async function updateProduct(req: AuthRequest, res: Response) {
   }
 }
 
+export async function deleteProduct(req: AuthRequest, res: Response) {
+  try {
+    const { id } = req.params;
+
+    // Check if product exists
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        saleItems: {
+          take: 1,
+        },
+        stockEntries: {
+          take: 1,
+        },
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Check if product has been used in sales or stock entries
+    if (product.saleItems.length > 0) {
+      return res.status(400).json({ 
+        error: 'Cannot delete product that has been used in sales. Consider marking it as inactive instead.' 
+      });
+    }
+
+    // Delete the product (cascade will handle related records)
+    await prisma.product.delete({
+      where: { id },
+    });
+
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error: any) {
+    console.error('Delete product error:', error);
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+export async function getCategories(req: AuthRequest, res: Response) {
+  try {
+    // Get all unique categories from products
+    const products = await prisma.product.findMany({
+      where: {
+        category: {
+          not: null,
+        },
+      },
+      select: {
+        category: true,
+      },
+      distinct: ['category'],
+    });
+
+    const categories = products
+      .map(p => p.category)
+      .filter((cat): cat is string => cat !== null)
+      .sort();
+
+    res.json(categories);
+  } catch (error: any) {
+    console.error('Get categories error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 

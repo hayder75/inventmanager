@@ -28,11 +28,12 @@ interface CreateSaleInput {
   walkinPhone?: string;
   items: SaleItemInput[];
   paymentMethods: Array<{ method: 'CASH' | 'BANK_TRANSFER' | 'CREDIT'; amount: number; bankType?: string }>;
+  bankTransferImageUrl?: string;
 }
 
 export async function createSale(req: AuthRequest, res: Response) {
   try {
-    const { companyId, walkinName, walkinPhone, items, paymentMethods }: CreateSaleInput = req.body;
+    const { companyId, walkinName, walkinPhone, items, paymentMethods, bankTransferImageUrl }: CreateSaleInput = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ error: 'Sale must have at least one item' });
@@ -240,6 +241,7 @@ export async function createSale(req: AuthRequest, res: Response) {
           totalCredit,
           commissionAmount,
           bankType: bankType || null,
+          bankTransferImageUrl: bankTransferImageUrl || null,
           salespersonId: req.user!.id,
           items: {
                         create: items.map(item => ({
@@ -473,6 +475,7 @@ export async function getBankDeposits(req: AuthRequest, res: Response) {
         id: true,
         invoiceNumber: true,
         bankType: true,
+        bankTransferImageUrl: true,
         totalPaid: true,
         createdAt: true,
         salesperson: {
@@ -497,6 +500,7 @@ export async function getBankDeposits(req: AuthRequest, res: Response) {
       id: sale.id,
       invoiceNumber: sale.invoiceNumber,
       bankType: sale.bankType,
+      bankTransferImageUrl: sale.bankTransferImageUrl,
       amount: sale.totalPaid.toString(),
       createdAt: sale.createdAt.toISOString(),
       salesperson: sale.salesperson,

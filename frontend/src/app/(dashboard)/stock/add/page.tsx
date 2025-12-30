@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Plus, X, Save } from 'lucide-react';
@@ -35,6 +35,22 @@ export default function AddStockPage() {
     },
   ]);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [newCategoryName, setNewCategoryName] = useState<{ [key: number]: string }>({});
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState<{ [key: number]: boolean }>({});
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/api/products/categories');
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
 
   const addEntry = () => {
     setEntries([
@@ -109,7 +125,7 @@ export default function AddStockPage() {
           <div className="space-y-4">
             {entries.map((entry, index) => (
               <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-3">
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Product Name/Code
@@ -121,6 +137,76 @@ export default function AddStockPage() {
                       className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
                       placeholder="Type to create new"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
+                    {showNewCategoryInput[index] ? (
+                      <div className="flex gap-1">
+                        <input
+                          type="text"
+                          value={newCategoryName[index] || ''}
+                          onChange={(e) => {
+                            setNewCategoryName({ ...newCategoryName, [index]: e.target.value });
+                          }}
+                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                          placeholder="New category name"
+                          onBlur={() => {
+                            if (newCategoryName[index]?.trim()) {
+                              updateEntry(index, { category: newCategoryName[index].trim() });
+                              if (!categories.includes(newCategoryName[index].trim())) {
+                                setCategories([...categories, newCategoryName[index].trim()].sort());
+                              }
+                            }
+                            setShowNewCategoryInput({ ...showNewCategoryInput, [index]: false });
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              if (newCategoryName[index]?.trim()) {
+                                updateEntry(index, { category: newCategoryName[index].trim() });
+                                if (!categories.includes(newCategoryName[index].trim())) {
+                                  setCategories([...categories, newCategoryName[index].trim()].sort());
+                                }
+                              }
+                              setShowNewCategoryInput({ ...showNewCategoryInput, [index]: false });
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowNewCategoryInput({ ...showNewCategoryInput, [index]: false });
+                            setNewCategoryName({ ...newCategoryName, [index]: '' });
+                          }}
+                          className="px-2 text-sm text-gray-600 hover:text-gray-800"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-1">
+                        <select
+                          value={entry.category || ''}
+                          onChange={(e) => {
+                            if (e.target.value === '__new__') {
+                              setShowNewCategoryInput({ ...showNewCategoryInput, [index]: true });
+                            } else {
+                              updateEntry(index, { category: e.target.value || undefined });
+                            }
+                          }}
+                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                        >
+                          <option value="">Select category</option>
+                          {categories.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat}
+                            </option>
+                          ))}
+                          <option value="__new__">+ Create New Category</option>
+                        </select>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Quantity *</label>

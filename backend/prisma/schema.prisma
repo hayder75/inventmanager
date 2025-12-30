@@ -193,6 +193,7 @@ model Sale {
   totalCredit   Decimal  @default(0) @map("total_credit") @db.Decimal(12, 2)
   commissionAmount Decimal @default(0) @map("commission_amount") @db.Decimal(12, 2) // Commission amount
   bankType      String?  @map("bank_type") // Bank type for bank transfers (CBE, ABYSSINYA, AWASH, TELEBIRR, or OTHER:name)
+  bankTransferImageUrl String? @map("bank_transfer_image_url") // Image URL for bank transfer receipt
   salespersonId String  @map("salesperson_id")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")

@@ -51,6 +51,8 @@ export default function NewSalePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [items, setItems] = useState<SaleItem[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<Array<{ method: 'CASH' | 'BANK_TRANSFER' | 'CREDIT'; amount: number; bankType?: string }>>([]);
+  const [bankTransferImage, setBankTransferImage] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
     vat_enabled: false,
@@ -339,6 +341,7 @@ export default function NewSalePage() {
           salespersonCommissionAmount: item.salespersonCommissionAmount || 0,
         })),
         paymentMethods,
+        bankTransferImageUrl: bankTransferImage,
         subtotal, // Send calculated subtotal (based on salesperson's entered prices)
         vatAmount,
         totAmount,
@@ -716,7 +719,7 @@ export default function NewSalePage() {
                 </button>
               </div>
               {pm.method === 'BANK_TRANSFER' && buyerType === 'walkin' && (
-                <div className="ml-0">
+                <div className="ml-0 space-y-2">
                   <select
                     value={pm.bankType?.startsWith('OTHER:') ? 'OTHER' : (pm.bankType || '')}
                     onChange={(e) => {
@@ -747,11 +750,54 @@ export default function NewSalePage() {
                         updated[index] = { ...updated[index], bankType: `OTHER:${e.target.value}` };
                         setPaymentMethods(updated);
                       }}
-                      className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                       placeholder="Enter bank name"
                       required
                     />
                   )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Transaction Receipt Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploadingImage(true);
+                        try {
+                          const formData = new FormData();
+                          formData.append('image', file);
+                          const response = await api.post('/api/upload/bank-transfer', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' },
+                          });
+                          setBankTransferImage(response.data.imageUrl);
+                        } catch (error: any) {
+                          alert(error.response?.data?.error || 'Failed to upload image');
+                        } finally {
+                          setUploadingImage(false);
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      disabled={uploadingImage}
+                    />
+                    {bankTransferImage && (
+                      <div className="mt-2">
+                        <img
+                          src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${bankTransferImage}`}
+                          alt="Bank transfer receipt"
+                          className="max-w-xs max-h-32 object-contain border border-gray-300 rounded"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setBankTransferImage(null)}
+                          className="mt-1 text-sm text-red-600 hover:text-red-800"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                    {uploadingImage && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
+                  </div>
                 </div>
               )}
             </div>

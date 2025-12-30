@@ -20,10 +20,19 @@ interface Adjustment {
   creator: { name: string };
 }
 
+interface Product {
+  id: string;
+  name: string;
+  stockQty: number;
+  category: string | null;
+}
+
 export default function StockAdjustmentsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [adjustments, setAdjustments] = useState<Adjustment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [categories, setCategories] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     productId: '',
@@ -36,14 +45,30 @@ export default function StockAdjustmentsPage() {
   useEffect(() => {
     fetchProducts();
     fetchAdjustments();
+    fetchCategories();
   }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [selectedCategory]);
 
   const fetchProducts = async () => {
     try {
-      const response = await api.get('/api/products');
+      const params = new URLSearchParams();
+      if (selectedCategory) params.append('category', selectedCategory);
+      const response = await api.get(`/api/products?${params.toString()}`);
       setProducts(response.data);
     } catch (error) {
       console.error('Failed to fetch products:', error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/api/products/categories');
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
     }
   };
 
@@ -157,6 +182,24 @@ export default function StockAdjustmentsPage() {
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">New Stock Adjustment</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => {
+                    setSelectedCategory(e.target.value);
+                    setFormData({ ...formData, productId: '' }); // Reset product when category changes
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Product *</label>
                 <select

@@ -8,6 +8,7 @@ interface BankDeposit {
   id: string;
   invoiceNumber: string;
   bankType: string | null;
+  bankTransferImageUrl: string | null;
   amount: string;
   createdAt: string;
   salesperson: { name: string };
@@ -246,12 +247,13 @@ export default function BankDepositsPage() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Salesperson</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Receipt</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {modalDeposits.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                      <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
                         No transactions found
                       </td>
                     </tr>
@@ -265,6 +267,20 @@ export default function BankDepositsPage() {
                         </td>
                         <td className="px-4 py-3">{deposit.salesperson.name}</td>
                         <td className="px-4 py-3 font-semibold">{formatCurrency(deposit.amount)}</td>
+                        <td className="px-4 py-3">
+                          {deposit.bankTransferImageUrl ? (
+                            <a
+                              href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${deposit.bankTransferImageUrl}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              View Image
+                            </a>
+                          ) : (
+                            <span className="text-gray-400">No image</span>
+                          )}
+                        </td>
                       </tr>
                     ))
                   )}
@@ -272,7 +288,7 @@ export default function BankDepositsPage() {
                 {modalDeposits.length > 0 && (
                   <tfoot className="bg-gray-50">
                     <tr>
-                      <td colSpan={4} className="px-4 py-3 text-right font-semibold">Total:</td>
+                      <td colSpan={5} className="px-4 py-3 text-right font-semibold">Total:</td>
                       <td className="px-4 py-3 font-bold text-lg">
                         {formatCurrency(
                           modalDeposits.reduce((sum, d) => sum + parseFloat(d.amount), 0)
@@ -309,6 +325,19 @@ export default function BankDepositsPage() {
                           <p className="font-medium">{deposit.salesperson.name}</p>
                         </div>
                       </div>
+                      {deposit.bankTransferImageUrl && (
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Receipt:</p>
+                          <a
+                            href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${deposit.bankTransferImageUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline text-sm"
+                          >
+                            View Receipt Image
+                          </a>
+                        </div>
+                      )}
                     </div>
                   ))}
                   {modalDeposits.length > 0 && (
