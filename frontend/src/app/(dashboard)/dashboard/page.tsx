@@ -266,40 +266,40 @@ export default function DashboardPage() {
                       <p className="text-gray-500 text-center py-4">No sales today</p>
                     )}
                   </div>
-                </div>
+          </div>
 
-                {/* Low Stock Alerts */}
-                {stats.lowStockAlerts > 0 && (
-                  <div className="bg-white rounded-lg shadow">
+          {/* Low Stock Alerts */}
+          {stats.lowStockAlerts > 0 && (
+            <div className="bg-white rounded-lg shadow">
                     <div className="p-4 md:p-6 border-b border-gray-200">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center">
+                <div className="flex items-center">
                           <AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-yellow-600 mr-2" />
                           <h2 className="text-base md:text-lg font-semibold text-gray-900">
                             Low Stock ({stats.lowStockAlerts})
-                          </h2>
+                  </h2>
                         </div>
                         <Link href="/products" className="text-xs md:text-sm text-yellow-600 hover:underline">
                           View all →
                         </Link>
-                      </div>
-                    </div>
+                </div>
+              </div>
                     <div className="p-4 md:p-6">
-                      <div className="space-y-3">
+                <div className="space-y-3">
                         {stats.lowStockProducts.slice(0, 5).map((product) => (
-                          <div
-                            key={product.id}
-                            className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg"
-                          >
-                            <div>
-                              <p className="font-medium text-gray-900">{product.name}</p>
-                              <p className="text-sm text-gray-600">
+                    <div
+                      key={product.id}
+                      className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg"
+                    >
+                      <div>
+                        <p className="font-medium text-gray-900">{product.name}</p>
+                        <p className="text-sm text-gray-600">
                                 Stock: {product.stockQty} | Alert: {product.lowStockAlert}
-                              </p>
-                            </div>
-                            <Package className="h-5 w-5 text-yellow-600" />
-                          </div>
-                        ))}
+                        </p>
+                      </div>
+                      <Package className="h-5 w-5 text-yellow-600" />
+                    </div>
+                  ))}
                       </div>
                     </div>
                   </div>

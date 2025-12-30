@@ -256,15 +256,15 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col space-y-3 md:flex-row md:justify-between md:items-center md:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Sales</h1>
-          <p className="text-gray-600 mt-1">View all sales transactions</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Sales</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">View all sales transactions</p>
         </div>
         <Link
           href="/sales/new"
-          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          className="flex items-center justify-center px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-[44px] w-full md:w-auto"
         >
           <Plus className="h-5 w-5 mr-2" />
           New Sale
@@ -279,13 +279,14 @@ export default function SalesPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
               placeholder="Search by invoice, company, or walk-in name..."
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
@@ -343,14 +344,14 @@ export default function SalesPage() {
                     <div className="flex items-center space-x-2">
                       <Link
                         href={`/sales/${sale.id}`}
-                        className="text-primary-600 hover:text-primary-800"
+                        className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                         title="View Details"
                       >
                         <Eye className="h-5 w-5" />
                       </Link>
                       <button
                         onClick={() => handlePrint(sale.id)}
-                        className="text-gray-600 hover:text-gray-800"
+                        className="text-gray-600 hover:text-gray-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                         title="Print Invoice"
                       >
                         <Printer className="h-5 w-5" />
@@ -361,6 +362,60 @@ export default function SalesPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden p-4 space-y-3">
+          {filteredSales.map((sale) => (
+            <div key={sale.id} className="border border-gray-200 rounded-lg p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">{sale.invoiceNumber}</h3>
+                  <p className="text-xs text-gray-500">{formatDate(sale.createdAt)}</p>
+                </div>
+                <div className="flex space-x-2">
+                  <Link
+                    href={`/sales/${sale.id}`}
+                    className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    title="View Details"
+                  >
+                    <Eye className="h-5 w-5" />
+                  </Link>
+                  <button
+                    onClick={() => handlePrint(sale.id)}
+                    className="text-gray-600 hover:text-gray-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    title="Print Invoice"
+                  >
+                    <Printer className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <p className="text-xs text-gray-500">Customer</p>
+                  <p className="font-medium truncate">{sale.company?.name || sale.walkinName || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Salesperson</p>
+                  <p className="font-medium truncate">{sale.salesperson.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Total</p>
+                  <p className="font-semibold">{formatCurrency(sale.totalAmount)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Paid</p>
+                  <p className="font-medium text-green-600">{formatCurrency(sale.totalPaid)}</p>
+                </div>
+                {parseFloat(sale.totalCredit) > 0 && (
+                  <div className="col-span-2">
+                    <p className="text-xs text-gray-500">Credit</p>
+                    <p className="font-medium text-yellow-600">{formatCurrency(sale.totalCredit)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

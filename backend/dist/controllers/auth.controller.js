@@ -1,0 +1,147 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.login = login;
+exports.register = register;
+exports.verify = verify;
+exports.verifyAccessCode = verifyAccessCode;
+const prisma_1 = require("../utils/prisma");
+const password_1 = require("../utils/password");
+const jwt_1 = require("../utils/jwt");
+async function login(req, res) {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+        const user = await prisma_1.prisma.user.findUnique({
+            where: { email: email.toLowerCase() },
+        });
+        if (!user || !user.isActive) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        const isValidPassword = await (0, password_1.verifyPassword)(password, user.passwordHash);
+        if (!isValidPassword) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        const token = (0, jwt_1.generateToken)({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+        });
+        res.json({
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+            },
+            token,
+        });
+    }
+    catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+async function register(req, res) {
+    try {
+        const { email, password, name, role } = req.body;
+        // Only ADMIN can register new users
+        // This should be protected by middleware in production
+        if (!email || !password || !name) {
+            return res.status(400).json({ error: 'Email, password, and name are required' });
+        }
+        const existingUser = await prisma_1.prisma.user.findUnique({
+            where: { email: email.toLowerCase() },
+        });
+        if (existingUser) {
+            return res.status(400).json({ error: 'User already exists' });
+        }
+        const passwordHash = await (0, password_1.hashPassword)(password);
+        const user = await prisma_1.prisma.user.create({
+            data: {
+                email: email.toLowerCase(),
+                passwordHash,
+                name,
+                role: role || 'SALES',
+            },
+        });
+        const token = (0, jwt_1.generateToken)({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+        });
+        res.status(201).json({
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+            },
+            token,
+        });
+    }
+    catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+async function verify(req, res) {
+    try {
+        // User is already authenticated by middleware
+        const user = await prisma_1.prisma.user.findUnique({
+            where: { id: req.user.id },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                isActive: true,
+            },
+        });
+        if (!user || !user.isActive) {
+            return res.status(401).json({ error: 'User not found or inactive' });
+        }
+        // Check if token role matches database role - if not, token is outdated
+        if (req.user.role !== user.role) {
+            return res.status(401).json({ error: 'Token role mismatch. Please log in again.' });
+        }
+        res.json({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+        });
+    }
+    catch (error) {
+        console.error('Verify error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+async function verifyAccessCode(req, res) {
+    try {
+        const { accessCode } = req.body;
+        if (!accessCode) {
+            return res.status(400).json({ error: 'Access code is required' });
+        }
+        // Get access code from database settings
+        const setting = await prisma_1.prisma.setting.findUnique({
+            where: { key: 'login_access_code' },
+        });
+        // Default access code if not set in database
+        const correctCode = setting?.value || 'REALBRIGHT2025';
+        if (accessCode === correctCode) {
+            res.json({ valid: true });
+        }
+        else {
+            res.status(401).json({ valid: false, error: 'Invalid access code' });
+        }
+    }
+    catch (error) {
+        console.error('Verify access code error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+//# sourceMappingURL=auth.controller.js.map

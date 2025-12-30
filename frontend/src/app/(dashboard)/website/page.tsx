@@ -86,8 +86,8 @@ export default function WebsiteManagementPage() {
 
     try {
       await api.put(`/api/website/admin/products/${editingProduct.id}/website`, formDataToSend, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
       fetchProducts();
       resetForm();
     } catch (error: any) {
@@ -156,14 +156,14 @@ export default function WebsiteManagementPage() {
                 placeholder="Product description for website..."
               />
             </div>
-            <div>
+              <div>
               <label className="block text-sm font-medium mb-1">Product Image</label>
-              <input
-                type="file"
-                accept="image/*"
+                <input
+                  type="file"
+                  accept="image/*"
                 onChange={handleImageChange}
-                className="w-full px-3 py-2 border rounded-lg"
-              />
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
               {imagePreview && (
                 <div className="mt-4 relative">
                   <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded" />
@@ -177,7 +177,7 @@ export default function WebsiteManagementPage() {
                   >
                     <X className="w-4 h-4" />
                   </button>
-                </div>
+              </div>
               )}
             </div>
             <div className="flex gap-2">

@@ -159,7 +159,7 @@ export default function HomePage() {
                 Visit us at our location in Hawassa, Ethiopia
               </p>
             </div>
-            
+
             <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-primary-100 hover:shadow-3xl transition-shadow duration-300 max-w-[98%] mx-auto">
               <div className="w-full h-[450px] md:h-[500px] relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-transparent pointer-events-none z-10" />
@@ -190,7 +190,7 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-            </div>
+              </div>
           </div>
         </section>
 

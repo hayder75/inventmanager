@@ -89,15 +89,15 @@ export default function ExpenseTrackerPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col space-y-3 md:flex-row md:justify-between md:items-center md:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Expense Tracker</h1>
-          <p className="text-gray-600 mt-1">Record and track miscellaneous expenses</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Expense Tracker</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">Record and track miscellaneous expenses</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          className="flex items-center justify-center px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-[44px] w-full md:w-auto"
         >
           <Plus className="h-5 w-5 mr-2" />
           Add Expense
@@ -105,19 +105,19 @@ export default function ExpenseTrackerPage() {
       </div>
 
       {/* Summary Card */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg shadow p-4 md:p-6">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-600">Total Expenses</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs md:text-sm text-gray-600">Total Expenses</p>
+            <p className="text-lg md:text-2xl font-bold text-red-600 mt-1 truncate">
               {formatCurrency(totalExpenses.toString())}
             </p>
             <p className="text-xs text-gray-500 mt-1">
               {expenses.length} expense{expenses.length !== 1 ? 's' : ''} recorded
             </p>
           </div>
-          <div className="p-3 bg-red-100 rounded-lg">
-            <DollarSign className="h-6 w-6 text-red-600" />
+          <div className="p-2 md:p-3 bg-red-100 rounded-lg ml-2 flex-shrink-0">
+            <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-red-600" />
           </div>
         </div>
       </div>

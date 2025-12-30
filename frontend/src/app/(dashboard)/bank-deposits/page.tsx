@@ -121,22 +121,22 @@ export default function BankDepositsPage() {
   const modalDeposits = getModalDeposits();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Bank Deposits</h1>
-        <p className="text-gray-600 mt-1">View bank deposit transactions</p>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Bank Deposits</h1>
+        <p className="text-sm md:text-base text-gray-600 mt-1">View bank deposit transactions</p>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
             <input
               type="date"
               value={dateFilter.startDate}
               onChange={(e) => setDateFilter({ ...dateFilter, startDate: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
             />
           </div>
           <div>
@@ -145,7 +145,7 @@ export default function BankDepositsPage() {
               type="date"
               value={dateFilter.endDate}
               onChange={(e) => setDateFilter({ ...dateFilter, endDate: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
             />
           </div>
           <div>
@@ -153,7 +153,7 @@ export default function BankDepositsPage() {
             <select
               value={bankFilter}
               onChange={(e) => setBankFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
             >
               <option value="">All Banks</option>
               <option value="CBE">CBE</option>
@@ -170,7 +170,7 @@ export default function BankDepositsPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                 placeholder="Search by invoice, salesperson, customer..."
               />
             </div>
@@ -179,25 +179,25 @@ export default function BankDepositsPage() {
       </div>
 
       {/* Bank Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {banks.map((bank) => (
           <div
             key={bank}
             onClick={() => handleBankClick(bank)}
-            className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow"
+            className="bg-white rounded-lg shadow p-4 md:p-6 cursor-pointer hover:shadow-lg transition-shadow min-h-[44px]"
           >
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{getBankDisplayName(bank)}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-gray-600 truncate">{getBankDisplayName(bank)}</p>
+                <p className="text-lg md:text-2xl font-bold text-gray-900 mt-1 truncate">
                   {formatCurrency(bankSummary[bank].total)}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {bankSummary[bank].count} transaction{bankSummary[bank].count !== 1 ? 's' : ''}
                 </p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <DollarSign className="h-6 w-6 text-blue-600" />
+              <div className="p-2 md:p-3 bg-blue-100 rounded-lg ml-2 flex-shrink-0">
+                <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
               </div>
             </div>
           </div>
@@ -206,10 +206,10 @@ export default function BankDepositsPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">
+              <h2 className="text-lg md:text-xl font-bold">
                 {getBankDisplayName(selectedBank || '')} - Transaction Details
               </h2>
               <button
@@ -217,9 +217,9 @@ export default function BankDepositsPage() {
                   setShowModal(false);
                   setSelectedBank(null);
                 }}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5 md:h-6 md:w-6" />
               </button>
             </div>
 
@@ -230,13 +230,14 @@ export default function BankDepositsPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                   placeholder="Search transactions..."
                 />
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
@@ -281,6 +282,49 @@ export default function BankDepositsPage() {
                   </tfoot>
                 )}
               </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-3">
+              {modalDeposits.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">No transactions found</div>
+              ) : (
+                <>
+                  {modalDeposits.map((deposit) => (
+                    <div key={deposit.id} className="border border-gray-200 rounded-lg p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-base font-bold text-gray-900">{deposit.invoiceNumber}</h3>
+                          <p className="text-xs text-gray-500">{formatDate(deposit.createdAt)}</p>
+                        </div>
+                        <p className="text-base font-semibold">{formatCurrency(deposit.amount)}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <p className="text-xs text-gray-500">Customer</p>
+                          <p className="font-medium">{deposit.walkinName || deposit.company?.name || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Salesperson</p>
+                          <p className="font-medium">{deposit.salesperson.name}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {modalDeposits.length > 0 && (
+                    <div className="border-t border-gray-200 pt-3 mt-3">
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold">Total:</span>
+                        <span className="font-bold text-lg">
+                          {formatCurrency(
+                            modalDeposits.reduce((sum, d) => sum + parseFloat(d.amount), 0)
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

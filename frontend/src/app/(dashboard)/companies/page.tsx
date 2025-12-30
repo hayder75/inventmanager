@@ -95,19 +95,19 @@ export default function CompaniesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Credit Users</h1>
-        <p className="text-gray-600 mt-1">Manage credit customers</p>
-      </div>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col space-y-3 md:flex-row md:justify-between md:items-center md:space-y-0">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Credit Users</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">Manage credit customers</p>
+        </div>
         <button
           onClick={() => {
             setEditingCompany(null);
             setFormData({ name: '', phone: '', address: '', creditLimit: '' });
             setShowModal(true);
           }}
-          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          className="flex items-center justify-center px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-[44px] w-full md:w-auto"
         >
           <Plus className="h-5 w-5 mr-2" />
           Add Credit User
@@ -115,22 +115,22 @@ export default function CompaniesPage() {
       </div>
 
       {/* Credit Recap */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-sm text-gray-600">Total Credit Limit</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-white rounded-lg shadow p-4 md:p-6">
+          <p className="text-xs md:text-sm text-gray-600">Total Credit Limit</p>
+          <p className="text-lg md:text-2xl font-bold text-gray-900 mt-1 truncate">
             {formatCurrency(totalCreditLimit)}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-sm text-gray-600">Total Credit Taken</p>
-          <p className="text-2xl font-bold text-yellow-600 mt-1">
+        <div className="bg-white rounded-lg shadow p-4 md:p-6">
+          <p className="text-xs md:text-sm text-gray-600">Total Credit Taken</p>
+          <p className="text-lg md:text-2xl font-bold text-yellow-600 mt-1 truncate">
             {formatCurrency(totalCreditTaken)}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-sm text-gray-600">Available Credit</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div className="bg-white rounded-lg shadow p-4 md:p-6">
+          <p className="text-xs md:text-sm text-gray-600">Available Credit</p>
+          <p className="text-lg md:text-2xl font-bold text-green-600 mt-1 truncate">
             {formatCurrency(totalAvailableCredit)}
           </p>
         </div>
@@ -144,13 +144,14 @@ export default function CompaniesPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
               placeholder="Search credit users..."
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
@@ -176,13 +177,13 @@ export default function CompaniesPage() {
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleEdit(company)}
-                        className="text-primary-600 hover:text-primary-800"
+                        className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <Edit className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handleDelete(company.id)}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-red-600 hover:text-red-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -193,12 +194,53 @@ export default function CompaniesPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden p-4 space-y-3">
+          {filteredCompanies.map((company) => (
+            <div key={company.id} className="border border-gray-200 rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-gray-900">{company.name}</h3>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEdit(company)}
+                    className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  >
+                    <Edit className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(company.id)}
+                    className="text-red-600 hover:text-red-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="text-xs text-gray-500">Phone</p>
+                  <p className="font-medium">{company.phone || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Credit Limit</p>
+                  <p className="font-medium">${parseFloat(company.creditLimit).toLocaleString()}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs text-gray-500">Balance</p>
+                  <p className={`font-semibold ${parseFloat(company.currentBalance) > 0 ? 'text-yellow-600' : 'text-gray-600'}`}>
+                    ${parseFloat(company.currentBalance).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg md:text-xl font-bold mb-4">
               {editingCompany ? 'Edit Credit User' : 'Add Credit User'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -208,7 +250,7 @@ export default function CompaniesPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                   required
                 />
               </div>
@@ -218,7 +260,7 @@ export default function CompaniesPage() {
                   type="text"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                 />
               </div>
               <div>
@@ -227,7 +269,7 @@ export default function CompaniesPage() {
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                 />
               </div>
               <div>
@@ -238,24 +280,24 @@ export default function CompaniesPage() {
                   value={formData.creditLimit || ''}
                   onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })}
                   placeholder="Enter credit limit"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                   required
                 />
               </div>
-              <div className="flex justify-end space-x-4">
+              <div className="flex flex-col space-y-2 md:flex-row md:justify-end md:space-y-0 md:space-x-4 pt-2">
                 <button
                   type="button"
                   onClick={() => {
                     setShowModal(false);
                     setEditingCompany(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] w-full md:w-auto"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  className="px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-[44px] w-full md:w-auto"
                 >
                   Save
                 </button>

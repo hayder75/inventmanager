@@ -12,33 +12,37 @@ interface ProductCardProps {
 export default function ProductCard({ product }: { product: ProductCardProps }) {
     return (
         <div className="group bg-white rounded-2xl overflow-hidden border border-primary-100 hover:border-brand-light/50 transition-all duration-300 hover:shadow-card hover:-translate-y-1">
-            {/* Image Container */}
-            <div className="relative h-64 w-full bg-primary-50 overflow-hidden">
-                {product.imageUrl ? (
+            {/* Image Container - Only show if image exists */}
+            {product.imageUrl && (
+                <div className="relative h-64 w-full bg-primary-50 overflow-hidden">
                     <img
                         src={product.imageUrl.startsWith('http') ? product.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${product.imageUrl}`}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-primary-300">
-                        <ShoppingCart size={48} />
-                    </div>
-                )}
 
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
 
-                {/* Category Badge */}
-                {product.category && (
-                    <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-primary-700 shadow-sm">
-                        {product.category}
-                    </div>
-                )}
-            </div>
+                    {/* Category Badge */}
+                    {product.category && (
+                        <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-primary-700 shadow-sm">
+                            {product.category}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Content */}
-            <div className="p-6">
+            <div className={`p-6 ${!product.imageUrl ? 'pt-6' : ''}`}>
+                {/* Category Badge - Show here if no image */}
+                {!product.imageUrl && product.category && (
+                    <div className="mb-3">
+                        <span className="inline-block px-3 py-1 bg-primary-50 rounded-full text-xs font-semibold text-primary-700">
+                            {product.category}
+                        </span>
+                    </div>
+                )}
                 <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-bold text-primary-900 line-clamp-1 group-hover:text-brand transition-colors">
                         {product.name}

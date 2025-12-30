@@ -1,0 +1,12 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const profitloss_controller_1 = require("../controllers/profitloss.controller");
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const router = express_1.default.Router();
+router.get('/', auth_middleware_1.authenticate, (0, auth_middleware_1.requireRole)('ADMIN'), profitloss_controller_1.getProfitLoss);
+exports.default = router;
+//# sourceMappingURL=profitloss.routes.js.map

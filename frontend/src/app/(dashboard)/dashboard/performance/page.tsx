@@ -124,7 +124,7 @@ export default function SalesPerformancePage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div>
+        <div>
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">Sales Performance</h1>
         <p className="text-sm md:text-base text-gray-600 mt-1">{getFilterLabel()}</p>
       </div>

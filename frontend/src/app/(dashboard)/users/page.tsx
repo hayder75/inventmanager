@@ -90,11 +90,11 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col space-y-3 md:flex-row md:justify-between md:items-center md:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-          <p className="text-gray-600 mt-1">Manage system users</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Users</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">Manage system users</p>
         </div>
         <button
           onClick={() => {
@@ -102,7 +102,7 @@ export default function UsersPage() {
             setFormData({ name: '', email: '', role: 'SALES', password: '' });
             setShowModal(true);
           }}
-          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          className="flex items-center justify-center px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-[44px] w-full md:w-auto"
         >
           <Plus className="h-5 w-5 mr-2" />
           Add User
@@ -110,7 +110,8 @@ export default function UsersPage() {
       </div>
 
       <div className="bg-white rounded-lg shadow">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
@@ -153,7 +154,7 @@ export default function UsersPage() {
                           });
                           setShowModal(true);
                         }}
-                        className="text-primary-600 hover:text-primary-800"
+                        className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <Edit className="h-5 w-5" />
                       </button>
@@ -162,13 +163,13 @@ export default function UsersPage() {
                           setEditingUser(user);
                           setShowPasswordModal(true);
                         }}
-                        className="text-yellow-600 hover:text-yellow-800"
+                        className="text-yellow-600 hover:text-yellow-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <Key className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handleDelete(user.id)}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-red-600 hover:text-red-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -179,12 +180,70 @@ export default function UsersPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden p-4 space-y-3">
+          {users.map((user) => (
+            <div key={user.id} className="border border-gray-200 rounded-lg p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-gray-900">{user.name}</h3>
+                  <p className="text-sm text-gray-600 truncate">{user.email}</p>
+                </div>
+                <div className="flex space-x-2 ml-2 flex-shrink-0">
+                  <button
+                    onClick={() => {
+                      setEditingUser(user);
+                      setFormData({
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        password: '',
+                      });
+                      setShowModal(true);
+                    }}
+                    className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  >
+                    <Edit className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingUser(user);
+                      setShowPasswordModal(true);
+                    }}
+                    className="text-yellow-600 hover:text-yellow-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  >
+                    <Key className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    className="text-red-600 hover:text-red-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-1 rounded text-xs ${
+                  user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {user.role}
+                </span>
+                <span className={`px-2 py-1 rounded text-xs ${
+                  user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
+                  {user.isActive ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg md:text-xl font-bold mb-4">
               {editingUser ? 'Edit User' : 'Add User'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -194,7 +253,7 @@ export default function UsersPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                   required
                 />
               </div>
@@ -204,7 +263,7 @@ export default function UsersPage() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                   required
                 />
               </div>
@@ -213,7 +272,7 @@ export default function UsersPage() {
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                   required
                 >
                   <option value="SALES">Sales</option>
@@ -227,25 +286,25 @@ export default function UsersPage() {
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                     required
                   />
                 </div>
               )}
-              <div className="flex justify-end space-x-4">
+              <div className="flex flex-col space-y-2 md:flex-row md:justify-end md:space-y-0 md:space-x-4 pt-2">
                 <button
                   type="button"
                   onClick={() => {
                     setShowModal(false);
                     setEditingUser(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] w-full md:w-auto"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  className="px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-[44px] w-full md:w-auto"
                 >
                   Save
                 </button>
@@ -256,9 +315,9 @@ export default function UsersPage() {
       )}
 
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Reset Password</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg md:text-xl font-bold mb-4">Reset Password</h2>
             <p className="text-sm text-gray-600 mb-4">User: {editingUser?.name}</p>
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
@@ -267,7 +326,7 @@ export default function UsersPage() {
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                   required
                 />
               </div>
@@ -277,24 +336,24 @@ export default function UsersPage() {
                   type="password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                   required
                 />
               </div>
-              <div className="flex justify-end space-x-4">
+              <div className="flex flex-col space-y-2 md:flex-row md:justify-end md:space-y-0 md:space-x-4 pt-2">
                 <button
                   type="button"
                   onClick={() => {
                     setShowPasswordModal(false);
                     setPasswordData({ newPassword: '', confirmPassword: '' });
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] w-full md:w-auto"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  className="px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-[44px] w-full md:w-auto"
                 >
                   Reset Password
                 </button>

@@ -62,15 +62,14 @@ export default function ProductsPage() {
                         </p>
                     </div>
 
-                    {/* Filters & Search */}
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 bg-white p-6 rounded-2xl shadow-sm border border-primary-100">
-                        {/* Category Filter */}
+                    {/* Category Filter */}
+                    <div className="mb-8 bg-white p-6 rounded-2xl shadow-sm border border-primary-100">
                         <div className="flex flex-wrap gap-2 justify-center">
                             {categories.map((category) => (
                                 <button
                                     key={category}
                                     onClick={() => setSelectedCategory(category)}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category
+                                    className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${selectedCategory === category
                                             ? 'bg-brand text-white shadow-md'
                                             : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
                                         }`}
@@ -79,17 +78,19 @@ export default function ProductsPage() {
                                 </button>
                             ))}
                         </div>
+                    </div>
 
-                        {/* Search Bar */}
-                        <div className="relative w-full md:w-72">
+                    {/* Search Bar - Big and Prominent */}
+                    <div className="mb-12 bg-white p-6 rounded-2xl shadow-sm border border-primary-100">
+                        <div className="relative max-w-3xl mx-auto">
                             <input
                                 type="text"
-                                placeholder="Search products..."
+                                placeholder="Search products by name or description..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 bg-primary-50 border border-primary-200 rounded-xl focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
+                                className="w-full pl-14 pr-6 py-4 text-base bg-primary-50 border-2 border-primary-200 rounded-xl focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
                             />
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400 w-4 h-4" />
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary-400 w-5 h-5" />
                         </div>
                     </div>
 

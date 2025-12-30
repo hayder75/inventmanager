@@ -74,11 +74,11 @@ export default function ContactsPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col space-y-3 md:flex-row md:justify-between md:items-center md:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
-          <p className="text-gray-600 mt-1">Quick phone book</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Contacts</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">Quick phone book</p>
         </div>
         <button
           onClick={() => {
@@ -86,7 +86,7 @@ export default function ContactsPage() {
             setFormData({ name: '', phone: '', notes: '' });
             setShowModal(true);
           }}
-          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          className="flex items-center justify-center px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-[44px] w-full md:w-auto"
         >
           <Plus className="h-5 w-5 mr-2" />
           Add Contact
@@ -101,13 +101,14 @@ export default function ContactsPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
               placeholder="Search contacts..."
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
@@ -139,7 +140,7 @@ export default function ContactsPage() {
                             alert(error.response?.data?.error || 'Failed to update visibility');
                           }
                         }}
-                        className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                        className={`px-3 py-1.5 rounded text-xs font-medium transition-colors min-h-[44px] ${
                           contact.visibleToSales
                             ? 'bg-green-100 text-green-800 hover:bg-green-200'
                             : 'bg-red-100 text-red-800 hover:bg-red-200'
@@ -161,13 +162,13 @@ export default function ContactsPage() {
                           });
                           setShowModal(true);
                         }}
-                        className="text-primary-600 hover:text-primary-800"
+                        className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <Edit className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handleDelete(contact.id)}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-red-600 hover:text-red-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -178,12 +179,77 @@ export default function ContactsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden p-4 space-y-3">
+          {filteredContacts.map((contact) => (
+            <div key={contact.id} className="border border-gray-200 rounded-lg p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-gray-900">{contact.name}</h3>
+                  <p className="text-sm text-gray-600">{contact.phone}</p>
+                </div>
+                <div className="flex space-x-2 ml-2 flex-shrink-0">
+                  <button
+                    onClick={() => {
+                      setEditingContact(contact);
+                      setFormData({
+                        name: contact.name,
+                        phone: contact.phone,
+                        notes: contact.notes || '',
+                      });
+                      setShowModal(true);
+                    }}
+                    className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  >
+                    <Edit className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(contact.id)}
+                    className="text-red-600 hover:text-red-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              {contact.notes && (
+                <div>
+                  <p className="text-xs text-gray-500">Notes</p>
+                  <p className="text-sm text-gray-700">{contact.notes}</p>
+                </div>
+              )}
+              {user?.role === 'ADMIN' && (
+                <div>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await api.put(`/api/contacts/${contact.id}`, {
+                          visibleToSales: !contact.visibleToSales,
+                        });
+                        fetchContacts();
+                      } catch (error: any) {
+                        alert(error.response?.data?.error || 'Failed to update visibility');
+                      }
+                    }}
+                    className={`w-full px-3 py-2 rounded text-xs font-medium transition-colors min-h-[44px] ${
+                      contact.visibleToSales
+                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                        : 'bg-red-100 text-red-800 hover:bg-red-200'
+                    }`}
+                  >
+                    {contact.visibleToSales ? 'Visible to Sales' : 'Hidden from Sales'}
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg md:text-xl font-bold mb-4">
               {editingContact ? 'Edit Contact' : 'Add Contact'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -193,7 +259,7 @@ export default function ContactsPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                   required
                 />
               </div>
@@ -203,7 +269,7 @@ export default function ContactsPage() {
                   type="text"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                   required
                 />
               </div>
@@ -212,24 +278,24 @@ export default function ContactsPage() {
                 <textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm"
                   rows={3}
                 />
               </div>
-              <div className="flex justify-end space-x-4">
+              <div className="flex flex-col space-y-2 md:flex-row md:justify-end md:space-y-0 md:space-x-4 pt-2">
                 <button
                   type="button"
                   onClick={() => {
                     setShowModal(false);
                     setEditingContact(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] w-full md:w-auto"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  className="px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 min-h-[44px] w-full md:w-auto"
                 >
                   Save
                 </button>

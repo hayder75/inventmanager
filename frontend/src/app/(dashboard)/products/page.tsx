@@ -46,10 +46,10 @@ export default function ProductsPage() {
   const isLowStock = (product: Product) => product.stockQty <= product.lowStockAlert;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-        <p className="text-gray-600 mt-1">View all products and stock levels</p>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Products</h1>
+        <p className="text-sm md:text-base text-gray-600 mt-1">View all products and stock levels</p>
       </div>
 
       <div className="bg-white rounded-lg shadow">
@@ -60,13 +60,14 @@ export default function ProductsPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm min-h-[44px]"
               placeholder="Search products by name or code..."
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
@@ -114,7 +115,7 @@ export default function ProductsPage() {
                     <td className="px-6 py-4">
                       <Link
                         href={`/products/${product.id}`}
-                        className="text-primary-600 hover:text-primary-800"
+                        className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <Edit className="h-5 w-5" />
                       </Link>
@@ -124,6 +125,64 @@ export default function ProductsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden p-4 space-y-3">
+          {filteredProducts.map((product) => (
+            <div key={product.id} className="border border-gray-200 rounded-lg p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-gray-900 truncate">{product.name}</h3>
+                  <p className="text-xs text-gray-500">{product.code || 'No code'}</p>
+                </div>
+                {user?.role === 'ADMIN' && (
+                  <Link
+                    href={`/products/${product.id}`}
+                    className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center ml-2 flex-shrink-0"
+                  >
+                    <Edit className="h-5 w-5" />
+                  </Link>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <p className="text-xs text-gray-500">Category</p>
+                  <p className="font-medium">{product.category || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Stock</p>
+                  <p className={`font-semibold ${isLowStock(product) ? 'text-yellow-600' : ''}`}>
+                    {product.stockQty}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Cost Price</p>
+                  <p className="font-medium">${parseFloat(product.costPrice).toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Selling Price</p>
+                  <p className="font-semibold">${parseFloat(product.sellingPrice).toFixed(2)}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs text-gray-500">Status</p>
+                  {isLowStock(product) ? (
+                    <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs mt-1">
+                      Low Stock
+                    </span>
+                  ) : product.stockQty === 0 ? (
+                    <span className="inline-block px-2 py-1 bg-red-100 text-red-800 rounded text-xs mt-1">
+                      Out of Stock
+                    </span>
+                  ) : (
+                    <span className="inline-block px-2 py-1 bg-green-100 text-green-800 rounded text-xs mt-1">
+                      In Stock
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
