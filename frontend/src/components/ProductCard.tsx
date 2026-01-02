@@ -14,12 +14,15 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: { product: ProductCardProps }) {
+    // Only initialize loading state if we actually have an imageUrl
+    const hasImageUrl = product.imageUrl && product.imageUrl.trim() !== '';
     const [imageError, setImageError] = useState(false);
-    const [imageLoading, setImageLoading] = useState(true);
+    const [imageLoading, setImageLoading] = useState(hasImageUrl);
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     // Construct image URL properly
     const getImageUrl = () => {
-        if (!product.imageUrl) return null;
+        if (!product.imageUrl || product.imageUrl.trim() === '') return null;
         if (product.imageUrl.startsWith('http')) return product.imageUrl;
         
         // Use API URL from environment or construct from current origin
@@ -37,7 +40,8 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
     };
 
     const imageUrl = getImageUrl();
-    const shouldShowImage = imageUrl && !imageError;
+    // Only show image container if we have a URL, it's not in error state, AND it has successfully loaded
+    const shouldShowImage = imageUrl && !imageError && imageLoaded;
 
     return (
         <div className="group bg-white rounded-2xl overflow-hidden border-2 border-primary-200 hover:border-brand-light/50 transition-all duration-300 hover:shadow-card hover:-translate-y-1 shadow-sm">
