@@ -10,31 +10,31 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#0F172A', // Slate 900 - Deep, premium dark
-          50: '#F8FAFC',
-          100: '#F1F5F9',
-          200: '#E2E8F0',
-          300: '#CBD5E1',
-          400: '#94A3B8',
-          500: '#64748B',
-          600: '#475569',
-          700: '#334155',
-          800: '#1E293B',
-          900: '#0F172A',
-          950: '#020617',
+          DEFAULT: '#000000', // Black - Main dark color
+          50: '#F9FAFB',
+          100: '#F3F4F6',
+          200: '#E5E7EB',
+          300: '#D1D5DB',
+          400: '#9CA3AF', // Medium gray
+          500: '#6B7280', // Gray
+          600: '#4B5563',
+          700: '#374151',
+          800: '#1F2937',
+          900: '#111827',
+          950: '#000000',
         },
         brand: {
-          DEFAULT: '#2563EB', // Royal Blue - Vibrant accent
-          light: '#60A5FA',
-          dark: '#1D4ED8',
+          DEFAULT: '#DC2626', // Red - Vibrant accent from palette
+          light: '#EF4444',
+          dark: '#B91C1C',
         },
         accent: {
-          DEFAULT: '#F59E0B', // Amber - Warmth for CTAs
-          hover: '#D97706',
+          DEFAULT: '#F97316', // Orange - Warm accent from palette
+          hover: '#EA580C',
         },
         background: {
-          DEFAULT: '#FFFFFF',
-          subtle: '#F8FAFC', // Very light gray for sections
+          DEFAULT: '#FFFFFF', // White
+          subtle: '#F9FAFB', // Very light gray for sections
         },
       },
       fontFamily: {
