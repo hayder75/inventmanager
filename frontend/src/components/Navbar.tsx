@@ -43,20 +43,19 @@ export default function Navbar() {
                             <ShoppingBag size={24} />
                         </div>
                         <span className={`text-2xl font-bold tracking-tight ${isScrolled ? 'text-primary' : 'text-primary'}`}>
-                            Real<span className="text-brand">Bright</span>
+                            Real<span className="text-brand">Bright</span> <span className="text-primary-600">Trading</span>
                         </span>
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center gap-8">
+                    <div className="hidden md:flex items-center gap-3">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 href={link.href}
-                                className="text-sm font-medium text-primary-600 hover:text-brand transition-colors relative group"
+                                className="px-4 py-2 bg-brand text-white rounded-full text-sm font-medium hover:bg-brand-dark transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
                             >
                                 {link.name}
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full" />
                             </Link>
                         ))}
                         <button
@@ -93,7 +92,7 @@ export default function Navbar() {
                                 key={link.name}
                                 href={link.href}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="px-4 py-3 text-primary-600 hover:bg-primary-50 hover:text-brand rounded-lg font-medium transition-colors"
+                                className="px-4 py-3 bg-brand text-white rounded-full font-medium hover:bg-brand-dark transition-colors text-center"
                             >
                                 {link.name}
                             </Link>
