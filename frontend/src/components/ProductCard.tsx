@@ -57,10 +57,14 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
                         src={imageUrl}
                         alt={product.name}
                         className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-                        onLoad={() => setImageLoading(false)}
+                        onLoad={() => {
+                            setImageLoading(false);
+                            setImageLoaded(true);
+                        }}
                         onError={() => {
                             setImageError(true);
                             setImageLoading(false);
+                            setImageLoaded(false);
                         }}
                     />
 
