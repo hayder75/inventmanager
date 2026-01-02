@@ -40,32 +40,36 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
     };
 
     const imageUrl = getImageUrl();
-    // Show image container if we have a URL and haven't errored yet (will hide if error occurs)
-    const shouldShowImage = imageUrl && !imageError;
+    // Only show image container AFTER image successfully loads (not while loading, not on error)
+    const shouldShowImage = imageUrl && imageLoaded && !imageError;
 
     return (
         <div className="group bg-white rounded-2xl overflow-hidden border-2 border-primary-200 hover:border-brand-light/50 transition-all duration-300 hover:shadow-card hover:-translate-y-1 shadow-sm">
-            {/* Image Container - Only show if image exists and loaded successfully */}
+            {/* Hidden image for loading check - only render if we have an imageUrl */}
+            {imageUrl && !imageLoaded && !imageError && (
+                <img
+                    src={imageUrl}
+                    alt=""
+                    className="hidden"
+                    onLoad={() => {
+                        setImageLoading(false);
+                        setImageLoaded(true);
+                    }}
+                    onError={() => {
+                        setImageError(true);
+                        setImageLoading(false);
+                        setImageLoaded(false);
+                    }}
+                />
+            )}
+
+            {/* Image Container - Only show AFTER image successfully loads */}
             {shouldShowImage && (
                 <div className="relative h-64 w-full bg-primary-50 overflow-hidden">
-                    {imageLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-primary-50">
-                            <div className="w-8 h-8 border-2 border-primary-300 border-t-brand rounded-full animate-spin" />
-                        </div>
-                    )}
                     <img
-                        src={imageUrl}
+                        src={imageUrl!}
                         alt={product.name}
-                        className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-                        onLoad={() => {
-                            setImageLoading(false);
-                            setImageLoaded(true);
-                        }}
-                        onError={() => {
-                            setImageError(true);
-                            setImageLoading(false);
-                            setImageLoaded(false);
-                        }}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
 
                     {/* Overlay on hover */}
