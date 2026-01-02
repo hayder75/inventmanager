@@ -10,7 +10,7 @@ const ACCESS_CODE_VERIFIED_KEY = 'access_code_verified';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
@@ -23,13 +23,40 @@ export default function LoginPage() {
   });
   const [error, setError] = useState('');
 
-  // Check if access code was already verified
+  // Check if user is already logged in
   useEffect(() => {
-    const isVerified = localStorage.getItem(ACCESS_CODE_VERIFIED_KEY);
-    if (isVerified === 'true') {
-      setShowLogin(true);
+    if (!loading) {
+      if (user) {
+        // User is already authenticated, redirect to dashboard
+        router.push('/dashboard');
+        return;
+      }
+      
+      // Check if access code was already verified
+      const isVerified = localStorage.getItem(ACCESS_CODE_VERIFIED_KEY);
+      if (isVerified === 'true') {
+        setShowLogin(true);
+      }
     }
-  }, []);
+  }, [user, loading, router]);
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // If user is logged in, show loading while redirecting
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const handleAccessCode = async (e: React.FormEvent) => {
     e.preventDefault();

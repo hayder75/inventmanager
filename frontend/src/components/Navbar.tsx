@@ -2,9 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import { Menu, X, ShoppingBag, User } from 'lucide-react';
 
 export default function Navbar() {
+    const router = useRouter();
+    const { user, loading } = useAuth();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -55,13 +59,19 @@ export default function Navbar() {
                                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full" />
                             </Link>
                         ))}
-                        <Link
-                            href="/login"
+                        <button
+                            onClick={() => {
+                                if (user) {
+                                    router.push('/dashboard');
+                                } else {
+                                    router.push('/login');
+                                }
+                            }}
                             className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full text-sm font-medium hover:bg-primary-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                         >
                             <User size={18} />
                             Staff Login
-                        </Link>
+                        </button>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -89,14 +99,20 @@ export default function Navbar() {
                             </Link>
                         ))}
                         <div className="h-px bg-gray-100 my-2" />
-                        <Link
-                            href="/login"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-800 transition-colors"
+                        <button
+                            onClick={() => {
+                                setIsMobileMenuOpen(false);
+                                if (user) {
+                                    router.push('/dashboard');
+                                } else {
+                                    router.push('/login');
+                                }
+                            }}
+                            className="flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-800 transition-colors w-full"
                         >
                             <User size={18} />
                             Staff Login
-                        </Link>
+                        </button>
                     </div>
                 </div>
             )}
