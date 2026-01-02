@@ -107,78 +107,113 @@ export default function HomePage() {
         </section>
 
         {/* About Us Section */}
-        <section id="about" className="py-20 bg-primary-950 text-white relative overflow-hidden">
+        <section id="about" className="py-24 bg-primary-950 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/2 h-full bg-brand/10 blur-3xl rounded-full translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-1/2 h-full bg-accent/5 blur-3xl rounded-full -translate-x-1/2" />
+          
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              <div>
-                <h2 className="text-brand font-bold tracking-wider uppercase mb-2">About Us</h2>
-                <h3 className="text-4xl font-bold mb-6">A Company You Can Always Trust</h3>
-                
-                <div className="space-y-6 text-primary-200 text-lg leading-relaxed">
-                  <p>
-                    <strong className="text-white">Real Bright Trading (Wondyrad Abate)</strong> was established and registered in 2007, with its main office located in Hawassa, Ethiopia.
-                  </p>
-                  <p>
-                    Over the past 15 years, Real Bright Trading has accumulated a strong and healthy market trust through a simple principle that we follow: <strong className="text-brand">Earn Trust with Business</strong>.
-                  </p>
-                  <p>
-                    Real Bright Trading is among the distributors of ICT Materials, office Machinery, stationary items and super market products in Hawassa and the Region (SNNRS) for almost 15 years.
-                  </p>
-                  <p>
-                    Real Bright has been providing support and services to all major Government offices and NGOs in the region.
-                  </p>
-                </div>
+            {/* Header */}
+            <div className="text-center mb-16">
+              <h2 className="text-brand font-bold tracking-wider uppercase mb-3 text-sm">About Us</h2>
+              <h3 className="text-4xl md:text-5xl font-bold mb-6">A Company You Can Always Trust</h3>
+            </div>
 
-                <div className="mt-10 space-y-6">
-                  <div>
-                    <h4 className="text-2xl font-bold text-brand mb-3">Our Objective</h4>
-                    <p className="text-primary-200">
-                      Our objective is to become one of the leading market share holders in one of the most competitive markets in Ethiopia.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-2xl font-bold text-brand mb-3">Our Goal</h4>
-                    <p className="text-primary-200">
-                      Customer satisfaction is the ultimate goal of our company.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="text-2xl font-bold text-brand mb-3">Mission Statement</h4>
-                    <p className="text-primary-200">
-                      We are committed to provide our products at the right time at the right place with zero tolerance.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="text-2xl font-bold text-brand mb-3">Vision Statement</h4>
-                    <p className="text-primary-200">
-                      To be referred as the most favorable company in the ICT Materials, office machineries, stationary items and super market trading industry.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="text-2xl font-bold text-brand mb-3">Our Achievements</h4>
-                    <p className="text-primary-200">
-                      The principles and standards of Real Bright has made the company one of the most reputed trading organizations in Hawassa.
-                    </p>
-                  </div>
-                </div>
+            {/* Introduction Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20 items-center">
+              <div className="space-y-6 text-primary-200 text-lg leading-relaxed">
+                <p className="text-xl text-white">
+                  <strong className="text-brand">Real Bright Trading (Wondyrad Abate)</strong> was established and registered in 2007, with its main office located in Hawassa, Ethiopia.
+                </p>
+                <p>
+                  Over the past <strong className="text-white">15 years</strong>, Real Bright Trading has accumulated a strong and healthy market trust through a simple principle that we follow: <strong className="text-brand text-xl">Earn Trust with Business</strong>.
+                </p>
+                <p>
+                  Real Bright Trading is among the distributors of <strong className="text-white">ICT Materials, office Machinery, stationary items and super market products</strong> in Hawassa and the Region (SNNRS) for almost 15 years.
+                </p>
+                <p>
+                  Real Bright has been providing support and services to all major <strong className="text-white">Government offices and NGOs</strong> in the region.
+                </p>
               </div>
               <div className="relative">
-                <div className="aspect-square rounded-2xl overflow-hidden bg-primary-800 border border-primary-700 relative group">
+                <div className="aspect-square rounded-3xl overflow-hidden bg-primary-800 border-2 border-primary-700 relative group shadow-2xl">
                   <img
                     src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800"
                     alt="Real Bright Trading Office"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-primary-950/20 group-hover:bg-primary-950/0 transition-colors duration-500" />
-
-                  <div className="absolute -bottom-6 -left-6 w-48 h-48 bg-brand rounded-2xl -z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary-950/60 via-transparent to-transparent" />
+                  <div className="absolute -bottom-6 -left-6 w-48 h-48 bg-brand rounded-2xl -z-10 opacity-30" />
                   <div className="absolute -top-6 -right-6 w-48 h-48 bg-accent rounded-full -z-10 opacity-20" />
                 </div>
+              </div>
+            </div>
+
+            {/* Values Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Objective Card */}
+              <div className="bg-gradient-to-br from-primary-900 to-primary-800 border-2 border-primary-700 rounded-2xl p-8 hover:border-brand/50 transition-all duration-300 hover:shadow-xl hover:shadow-brand/20 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-brand/20 rounded-xl flex items-center justify-center mb-6">
+                  <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <h4 className="text-xl font-bold text-brand mb-4">Our Objective</h4>
+                <p className="text-primary-300 leading-relaxed">
+                  To become one of the leading market share holders in one of the most competitive markets in Ethiopia.
+                </p>
+              </div>
+
+              {/* Goal Card */}
+              <div className="bg-gradient-to-br from-primary-900 to-primary-800 border-2 border-primary-700 rounded-2xl p-8 hover:border-brand/50 transition-all duration-300 hover:shadow-xl hover:shadow-brand/20 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-brand/20 rounded-xl flex items-center justify-center mb-6">
+                  <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h4 className="text-xl font-bold text-brand mb-4">Our Goal</h4>
+                <p className="text-primary-300 leading-relaxed">
+                  Customer satisfaction is the ultimate goal of our company.
+                </p>
+              </div>
+
+              {/* Mission Card */}
+              <div className="bg-gradient-to-br from-primary-900 to-primary-800 border-2 border-primary-700 rounded-2xl p-8 hover:border-brand/50 transition-all duration-300 hover:shadow-xl hover:shadow-brand/20 hover:-translate-y-1 md:col-span-2 lg:col-span-1">
+                <div className="w-12 h-12 bg-brand/20 rounded-xl flex items-center justify-center mb-6">
+                  <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <h4 className="text-xl font-bold text-brand mb-4">Mission Statement</h4>
+                <p className="text-primary-300 leading-relaxed">
+                  We are committed to provide our products at the right time at the right place with zero tolerance.
+                </p>
+              </div>
+
+              {/* Vision Card */}
+              <div className="bg-gradient-to-br from-primary-900 to-primary-800 border-2 border-primary-700 rounded-2xl p-8 hover:border-brand/50 transition-all duration-300 hover:shadow-xl hover:shadow-brand/20 hover:-translate-y-1 md:col-span-2 lg:col-span-1">
+                <div className="w-12 h-12 bg-brand/20 rounded-xl flex items-center justify-center mb-6">
+                  <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </div>
+                <h4 className="text-xl font-bold text-brand mb-4">Vision Statement</h4>
+                <p className="text-primary-300 leading-relaxed">
+                  To be referred as the most favorable company in the ICT Materials, office machineries, stationary items and super market trading industry.
+                </p>
+              </div>
+
+              {/* Achievements Card */}
+              <div className="bg-gradient-to-br from-primary-900 to-primary-800 border-2 border-primary-700 rounded-2xl p-8 hover:border-brand/50 transition-all duration-300 hover:shadow-xl hover:shadow-brand/20 hover:-translate-y-1 md:col-span-2 lg:col-span-1">
+                <div className="w-12 h-12 bg-brand/20 rounded-xl flex items-center justify-center mb-6">
+                  <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                </div>
+                <h4 className="text-xl font-bold text-brand mb-4">Our Achievements</h4>
+                <p className="text-primary-300 leading-relaxed">
+                  The principles and standards of Real Bright has made the company one of the most reputed trading organizations in Hawassa.
+                </p>
               </div>
             </div>
           </div>
