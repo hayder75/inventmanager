@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { ShoppingCart } from 'lucide-react';
 
 interface ProductCardProps {
@@ -11,15 +14,50 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: { product: ProductCardProps }) {
+    const [imageError, setImageError] = useState(false);
+    const [imageLoading, setImageLoading] = useState(true);
+
+    // Construct image URL properly
+    const getImageUrl = () => {
+        if (!product.imageUrl) return null;
+        if (product.imageUrl.startsWith('http')) return product.imageUrl;
+        
+        // Use API URL from environment or construct from current origin
+        let baseUrl = process.env.NEXT_PUBLIC_API_URL || 
+                     (typeof window !== 'undefined' ? window.location.origin.replace(':3000', ':5000') : 'http://localhost:5000');
+        
+        // Remove /api suffix if present, as static files are served at root level
+        if (baseUrl.endsWith('/api')) {
+            baseUrl = baseUrl.replace(/\/api$/, '');
+        }
+        
+        // Ensure imageUrl starts with /
+        const imagePath = product.imageUrl.startsWith('/') ? product.imageUrl : `/${product.imageUrl}`;
+        return `${baseUrl}${imagePath}`;
+    };
+
+    const imageUrl = getImageUrl();
+    const shouldShowImage = imageUrl && !imageError;
+
     return (
         <div className="group bg-white rounded-2xl overflow-hidden border-2 border-primary-200 hover:border-brand-light/50 transition-all duration-300 hover:shadow-card hover:-translate-y-1 shadow-sm">
-            {/* Image Container - Only show if image exists */}
-            {product.imageUrl && (
+            {/* Image Container - Only show if image exists and loaded successfully */}
+            {shouldShowImage && (
                 <div className="relative h-64 w-full bg-primary-50 overflow-hidden">
+                    {imageLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-primary-50">
+                            <div className="w-8 h-8 border-2 border-primary-300 border-t-brand rounded-full animate-spin" />
+                        </div>
+                    )}
                     <img
-                        src={product.imageUrl.startsWith('http') ? product.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${product.imageUrl}`}
+                        src={imageUrl}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                        onLoad={() => setImageLoading(false)}
+                        onError={() => {
+                            setImageError(true);
+                            setImageLoading(false);
+                        }}
                     />
 
                     {/* Overlay on hover */}
@@ -35,9 +73,9 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
             )}
 
             {/* Content */}
-            <div className={`p-6 ${!product.imageUrl ? 'pt-6' : ''}`}>
+            <div className={`p-6 ${!shouldShowImage ? 'pt-6' : ''}`}>
                 {/* Category Badge - Show here if no image */}
-                {!product.imageUrl && product.category && (
+                {!shouldShowImage && product.category && (
                     <div className="mb-3">
                         <span className="inline-block px-3 py-1 bg-primary-50 rounded-full text-xs font-semibold text-primary-700">
                             {product.category}
