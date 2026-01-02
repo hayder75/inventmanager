@@ -40,8 +40,8 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
     };
 
     const imageUrl = getImageUrl();
-    // Only show image container if we have a URL, it's not in error state, AND it has successfully loaded
-    const shouldShowImage = imageUrl && !imageError && imageLoaded;
+    // Show image container if we have a URL and haven't errored yet (will hide if error occurs)
+    const shouldShowImage = imageUrl && !imageError;
 
     return (
         <div className="group bg-white rounded-2xl overflow-hidden border-2 border-primary-200 hover:border-brand-light/50 transition-all duration-300 hover:shadow-card hover:-translate-y-1 shadow-sm">
