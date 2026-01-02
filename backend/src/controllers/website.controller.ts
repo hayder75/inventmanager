@@ -36,11 +36,13 @@ export const upload = multer({
   }
 });
 
-// Get public products (no auth required) - from inventory where showOnWebsite = true
+// Get public products (no auth required) - show all products by default
+// showOnWebsite flag can be used to hide specific products if needed (set to false to hide)
 export async function getPublicProducts(req: any, res: Response) {
   try {
     const products = await prisma.product.findMany({
-      where: { showOnWebsite: true },
+      // Show all products - remove showOnWebsite filter to display all products
+      // Admins can use showOnWebsite: false to hide specific products if needed
       orderBy: { name: 'asc' },
       select: {
         id: true,
@@ -70,13 +72,13 @@ export async function getPublicProducts(req: any, res: Response) {
   }
 }
 
-// Get new products (no auth required) - from inventory where showOnWebsite = true AND isNew = true
+// Get new products (no auth required) - show all new products
 export async function getNewProducts(req: any, res: Response) {
   try {
     const products = await prisma.product.findMany({
       where: { 
-        showOnWebsite: true,
         isNew: true,
+        // Show all new products regardless of showOnWebsite flag
       },
       orderBy: { createdAt: 'desc' },
       select: {
