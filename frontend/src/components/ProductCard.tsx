@@ -45,8 +45,26 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
 
     return (
         <div className="group bg-white rounded-2xl overflow-hidden border-2 border-primary-200 hover:border-brand-light/50 transition-all duration-300 hover:shadow-card hover:-translate-y-1 shadow-sm">
+            {/* Preload image invisibly to check if it exists */}
+            {imageUrl && !imageLoaded && !imageError && (
+                <img
+                    src={imageUrl}
+                    alt=""
+                    style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }}
+                    onLoad={() => {
+                        setImageLoading(false);
+                        setImageLoaded(true);
+                    }}
+                    onError={() => {
+                        setImageError(true);
+                        setImageLoading(false);
+                        setImageLoaded(false);
+                    }}
+                />
+            )}
+
             {/* Image Container - Only show AFTER image successfully loads */}
-            {shouldShowImage ? (
+            {shouldShowImage && (
                 <div className="relative h-64 w-full bg-primary-50 overflow-hidden">
                     <img
                         src={imageUrl!}
