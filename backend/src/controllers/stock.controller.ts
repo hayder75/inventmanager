@@ -188,15 +188,20 @@ export async function adjustStock(req: AuthRequest, res: Response) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // Check if adjustment would make stock negative
-    const newStock = product.stockQty + qtyChange;
-    if (newStock < 0) {
-      return res.status(400).json({ 
-        error: `Cannot adjust stock. Current: ${product.stockQty}, Change: ${qtyChange}, Result: ${newStock}` 
-      });
+    // Check if adjustment would make stock negative (only for immediate approval)
+    if (req.user.role === 'ADMIN') {
+      const newStock = product.stockQty + qtyChange;
+      if (newStock < 0) {
+        return res.status(400).json({ 
+          error: `Cannot adjust stock. Current: ${product.stockQty}, Change: ${qtyChange}, Result: ${newStock}` 
+        });
+      }
     }
 
     const result = await prisma.$transaction(async (tx) => {
+      // Determine status based on user role
+      const status = req.user!.role === 'ADMIN' ? 'APPROVED' : 'PENDING';
+
       // Create adjustment record
       const adjustment = await tx.stockAdjustment.create({
         data: {
@@ -204,19 +209,41 @@ export async function adjustStock(req: AuthRequest, res: Response) {
           qtyChange,
           reason,
           notes: notes || null,
+          status,
           createdBy: req.user!.id,
+          ...(status === 'APPROVED' ? {
+            approvedBy: req.user!.id,
+            approvedAt: new Date(),
+          } : {}),
         },
       });
 
-      // Update product stock
-      await tx.product.update({
-        where: { id: productId },
-        data: {
-          stockQty: {
-            increment: qtyChange,
-          },
-        },
-      });
+      // If ADMIN, apply adjustment immediately and update related products
+      if (status === 'APPROVED') {
+        // Find all products with the same code (if code exists)
+        const relatedProducts = product.code
+          ? await tx.product.findMany({
+              where: { code: product.code },
+            })
+          : [product];
+
+        // Update all related products
+        for (const relatedProduct of relatedProducts) {
+          const newStock = relatedProduct.stockQty + qtyChange;
+          if (newStock < 0) {
+            throw new Error(`Cannot adjust stock for ${relatedProduct.name}. Current: ${relatedProduct.stockQty}, Change: ${qtyChange}, Result: ${newStock}`);
+          }
+
+          await tx.product.update({
+            where: { id: relatedProduct.id },
+            data: {
+              stockQty: {
+                increment: qtyChange,
+              },
+            },
+          });
+        }
+      }
 
       return adjustment;
     });
@@ -224,6 +251,112 @@ export async function adjustStock(req: AuthRequest, res: Response) {
     res.status(201).json(result);
   } catch (error: any) {
     console.error('Adjust stock error:', error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+}
+
+export async function approveStockAdjustment(req: AuthRequest, res: Response) {
+  try {
+    const { id } = req.params;
+
+    if (!req.user || req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const adjustment = await prisma.stockAdjustment.findUnique({
+      where: { id },
+      include: { product: true },
+    });
+
+    if (!adjustment) {
+      return res.status(404).json({ error: 'Stock adjustment not found' });
+    }
+
+    if (adjustment.status !== 'PENDING') {
+      return res.status(400).json({ 
+        error: `Adjustment is already ${adjustment.status.toLowerCase()}` 
+      });
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      // Update adjustment status
+      const updatedAdjustment = await tx.stockAdjustment.update({
+        where: { id },
+        data: {
+          status: 'APPROVED',
+          approvedBy: req.user!.id,
+          approvedAt: new Date(),
+        },
+      });
+
+      // Find all products with the same code (if code exists)
+      const relatedProducts = adjustment.product.code
+        ? await tx.product.findMany({
+            where: { code: adjustment.product.code },
+          })
+        : [adjustment.product];
+
+      // Update all related products
+      for (const relatedProduct of relatedProducts) {
+        const newStock = relatedProduct.stockQty + adjustment.qtyChange;
+        if (newStock < 0) {
+          throw new Error(`Cannot adjust stock for ${relatedProduct.name}. Current: ${relatedProduct.stockQty}, Change: ${adjustment.qtyChange}, Result: ${newStock}`);
+        }
+
+        await tx.product.update({
+          where: { id: relatedProduct.id },
+          data: {
+            stockQty: {
+              increment: adjustment.qtyChange,
+            },
+          },
+        });
+      }
+
+      return updatedAdjustment;
+    });
+
+    res.json(result);
+  } catch (error: any) {
+    console.error('Approve stock adjustment error:', error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+}
+
+export async function rejectStockAdjustment(req: AuthRequest, res: Response) {
+  try {
+    const { id } = req.params;
+
+    if (!req.user || req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const adjustment = await prisma.stockAdjustment.findUnique({
+      where: { id },
+    });
+
+    if (!adjustment) {
+      return res.status(404).json({ error: 'Stock adjustment not found' });
+    }
+
+    if (adjustment.status !== 'PENDING') {
+      return res.status(400).json({ 
+        error: `Adjustment is already ${adjustment.status.toLowerCase()}` 
+      });
+    }
+
+    const updatedAdjustment = await prisma.stockAdjustment.update({
+      where: { id },
+      data: {
+        status: 'REJECTED',
+        approvedBy: req.user.id,
+        approvedAt: new Date(),
+      },
+    });
+
+    res.json(updatedAdjustment);
+  } catch (error: any) {
+    console.error('Reject stock adjustment error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -263,11 +396,17 @@ export async function getStockEntries(req: AuthRequest, res: Response) {
 
 export async function getStockAdjustments(req: AuthRequest, res: Response) {
   try {
-    const { productId, startDate, endDate } = req.query;
+    const { productId, startDate, endDate, status } = req.query;
 
     const where: any = {};
 
     if (productId) where.productId = productId as string;
+    if (status) where.status = status as string;
+
+    // SALES users can only see their own adjustments
+    if (req.user?.role === 'SALES') {
+      where.createdBy = req.user.id;
+    }
 
     if (startDate || endDate) {
       where.createdAt = {};
@@ -280,6 +419,12 @@ export async function getStockAdjustments(req: AuthRequest, res: Response) {
       include: {
         product: true,
         creator: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        approver: {
           select: {
             id: true,
             name: true,

@@ -36,13 +36,13 @@ export const upload = multer({
   }
 });
 
-// Get public products (no auth required) - show all products by default
-// showOnWebsite flag can be used to hide specific products if needed (set to false to hide)
+// Get public products (no auth required) - only show products with showOnWebsite = true
 export async function getPublicProducts(req: any, res: Response) {
   try {
     const products = await prisma.product.findMany({
-      // Show all products - remove showOnWebsite filter to display all products
-      // Admins can use showOnWebsite: false to hide specific products if needed
+      where: {
+        showOnWebsite: true, // Only show products marked as visible
+      },
       orderBy: { name: 'asc' },
       select: {
         id: true,
@@ -53,6 +53,8 @@ export async function getPublicProducts(req: any, res: Response) {
         category: true,
         stockQty: true,
         unit: true,
+        showImageOnWebsite: true,
+        showPriceOnWebsite: true,
       },
     });
     // Transform to match frontend expectations
@@ -60,11 +62,13 @@ export async function getPublicProducts(req: any, res: Response) {
       id: product.id,
       name: product.name,
       description: product.description,
-      imageUrl: product.imageUrl,
-      price: product.sellingPrice,
+      imageUrl: product.showImageOnWebsite ? product.imageUrl : null,
+      price: product.showPriceOnWebsite ? product.sellingPrice : null,
       category: product.category,
       stockQty: product.stockQty,
       unit: product.unit,
+      showImageOnWebsite: product.showImageOnWebsite,
+      showPriceOnWebsite: product.showPriceOnWebsite,
     }));
     res.json(transformedProducts);
   } catch (error: any) {
@@ -130,6 +134,8 @@ export async function getAllPublicProducts(req: AuthRequest, res: Response) {
         stockQty: true,
         unit: true,
         showOnWebsite: true,
+        showImageOnWebsite: true,
+        showPriceOnWebsite: true,
         isNew: true,
         notes: true,
       },
@@ -147,13 +153,15 @@ export async function updateProductWebsiteSettings(req: AuthRequest, res: Respon
       return res.status(403).json({ error: 'Admin access required' });
     }
     const { id } = req.params;
-    const { description, showOnWebsite, isNew } = req.body;
+    const { description, showOnWebsite, isNew, showImageOnWebsite, showPriceOnWebsite } = req.body;
     const imageUrl = req.file ? `/uploads/products/${req.file.filename}` : undefined;
 
     const updateData: any = {};
     if (description !== undefined) updateData.description = description;
     if (showOnWebsite !== undefined) updateData.showOnWebsite = showOnWebsite === 'true' || showOnWebsite === true;
     if (isNew !== undefined) updateData.isNew = isNew === 'true' || isNew === true;
+    if (showImageOnWebsite !== undefined) updateData.showImageOnWebsite = showImageOnWebsite === 'true' || showImageOnWebsite === true;
+    if (showPriceOnWebsite !== undefined) updateData.showPriceOnWebsite = showPriceOnWebsite === 'true' || showPriceOnWebsite === true;
     if (imageUrl) updateData.imageUrl = imageUrl;
 
     // If updating image, delete old image
@@ -180,6 +188,8 @@ export async function updateProductWebsiteSettings(req: AuthRequest, res: Respon
         category: true,
         stockQty: true,
         showOnWebsite: true,
+        showImageOnWebsite: true,
+        showPriceOnWebsite: true,
         isNew: true,
         notes: true,
       },
@@ -216,6 +226,8 @@ export async function toggleProductVisibility(req: AuthRequest, res: Response) {
         category: true,
         stockQty: true,
         showOnWebsite: true,
+        showImageOnWebsite: true,
+        showPriceOnWebsite: true,
         isNew: true,
         notes: true,
       },

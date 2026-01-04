@@ -15,6 +15,8 @@ interface Product {
   stockQty: number;
   unit: string | null;
   showOnWebsite: boolean;
+  showImageOnWebsite: boolean;
+  showPriceOnWebsite: boolean;
   isNew: boolean;
   notes: string | null;
 }
@@ -60,6 +62,40 @@ export default function WebsiteManagementPage() {
       setProducts(products.map(p => p.id === productId ? response.data : p));
     } catch (error: any) {
       alert(error.response?.data?.error || 'Failed to toggle new status');
+    }
+  };
+
+  const handleToggleImageVisibility = async (productId: string) => {
+    try {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      
+      const formDataToSend = new FormData();
+      formDataToSend.append('showImageOnWebsite', (!product.showImageOnWebsite).toString());
+      
+      const response = await api.put(`/api/website/admin/products/${productId}/website`, formDataToSend, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setProducts(products.map(p => p.id === productId ? response.data : p));
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Failed to toggle image visibility');
+    }
+  };
+
+  const handleTogglePriceVisibility = async (productId: string) => {
+    try {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      
+      const formDataToSend = new FormData();
+      formDataToSend.append('showPriceOnWebsite', (!product.showPriceOnWebsite).toString());
+      
+      const response = await api.put(`/api/website/admin/products/${productId}/website`, formDataToSend, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setProducts(products.map(p => p.id === productId ? response.data : p));
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Failed to toggle price visibility');
     }
   };
 
@@ -209,6 +245,8 @@ export default function WebsiteManagementPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">New</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
@@ -216,7 +254,7 @@ export default function WebsiteManagementPage() {
           <tbody className="bg-white divide-y divide-gray-200">
             {products.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
                   No products found in inventory.
                 </td>
               </tr>
@@ -284,6 +322,50 @@ export default function WebsiteManagementPage() {
                         <>
                           <EyeOff className="w-4 h-4" />
                           Hidden
+                        </>
+                      )}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => handleToggleImageVisibility(product.id)}
+                      className={`px-3 py-1 text-xs rounded-full flex items-center gap-1 ${
+                        product.showImageOnWebsite 
+                          ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' 
+                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      }`}
+                    >
+                      {product.showImageOnWebsite ? (
+                        <>
+                          <Eye className="w-4 h-4" />
+                          Show
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="w-4 h-4" />
+                          Hide
+                        </>
+                      )}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => handleTogglePriceVisibility(product.id)}
+                      className={`px-3 py-1 text-xs rounded-full flex items-center gap-1 ${
+                        product.showPriceOnWebsite 
+                          ? 'bg-purple-100 text-purple-800 hover:bg-purple-200' 
+                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      }`}
+                    >
+                      {product.showPriceOnWebsite ? (
+                        <>
+                          <Eye className="w-4 h-4" />
+                          Show
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="w-4 h-4" />
+                          Hide
                         </>
                       )}
                     </button>

@@ -11,11 +11,15 @@ interface ProductCardProps {
     price: number | null;
     category: string | null;
     unit: string | null;
+    showImageOnWebsite?: boolean;
+    showPriceOnWebsite?: boolean;
 }
 
 export default function ProductCard({ product }: { product: ProductCardProps }) {
-    // Only initialize loading state if we actually have an imageUrl
-    const hasImageUrl = product.imageUrl && product.imageUrl.trim() !== '';
+    // Check if image should be shown
+    const showImage = product.showImageOnWebsite !== false; // Default to true if not specified
+    // Only initialize loading state if we actually have an imageUrl and should show image
+    const hasImageUrl = showImage && product.imageUrl && product.imageUrl.trim() !== '';
     const [imageError, setImageError] = useState(false);
     const [imageLoading, setImageLoading] = useState(hasImageUrl);
     const [imageLoaded, setImageLoaded] = useState(false);
@@ -99,7 +103,7 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
                         {product.name}
                     </h3>
                     <div className="text-right">
-                    {product.price && (
+                    {product.showPriceOnWebsite !== false && product.price && (
                         <div>
                             <span className="text-lg font-bold text-brand block">
                                 ${parseFloat(product.price.toString()).toFixed(2)}
@@ -114,6 +118,11 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
                                     per {product.unit === 'pcs' ? 'piece' : product.unit}
                                 </span>
                             )}
+                        </div>
+                    )}
+                    {product.showPriceOnWebsite === false && (
+                        <div className="text-sm text-primary-500 italic">
+                            Price on request
                         </div>
                     )}
                     </div>
