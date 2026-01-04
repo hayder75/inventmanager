@@ -34,6 +34,7 @@ export default function AddStockPage() {
       status: 'FULLY_PAID',
     },
   ]);
+  const [sellingPriceManuallySet, setSellingPriceManuallySet] = useState<{ [key: number]: boolean }>({});
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<{ [key: number]: string }>({});
@@ -53,6 +54,7 @@ export default function AddStockPage() {
   };
 
   const addEntry = () => {
+    const newIndex = entries.length;
     setEntries([
       ...entries,
       {
@@ -64,6 +66,8 @@ export default function AddStockPage() {
         status: 'FULLY_PAID',
       },
     ]);
+    // Reset manual setting flag for new entry
+    setSellingPriceManuallySet({ ...sellingPriceManuallySet, [newIndex]: false });
   };
 
   const updateEntry = (index: number, updates: Partial<StockEntry>) => {
@@ -74,6 +78,16 @@ export default function AddStockPage() {
 
   const removeEntry = (index: number) => {
     setEntries(entries.filter((_, i) => i !== index));
+    // Clean up manual setting flags
+    const newFlags: { [key: number]: boolean } = {};
+    entries.forEach((_, i) => {
+      if (i < index) {
+        newFlags[i] = sellingPriceManuallySet[i] || false;
+      } else if (i > index) {
+        newFlags[i - 1] = sellingPriceManuallySet[i] || false;
+      }
+    });
+    setSellingPriceManuallySet(newFlags);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -248,8 +262,13 @@ export default function AddStockPage() {
                       onChange={(e) => {
                         const val = e.target.value;
                         const costPrice = val === '' ? 0 : (parseFloat(val) || 0);
-                        const sellingPrice = entry.sellingPrice || (costPrice > 0 ? costPrice * 1.5 : 0);
-                        updateEntry(index, { costPrice, sellingPrice });
+                        // Only auto-calculate selling price if it hasn't been manually set
+                        if (!sellingPriceManuallySet[index] && costPrice > 0) {
+                          const autoSellingPrice = costPrice * 1.5;
+                          updateEntry(index, { costPrice, sellingPrice: autoSellingPrice });
+                        } else {
+                          updateEntry(index, { costPrice });
+                        }
                       }}
                       className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
                       required
@@ -264,7 +283,12 @@ export default function AddStockPage() {
                       value={entry.sellingPrice !== undefined && entry.sellingPrice !== 0 ? entry.sellingPrice : ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        updateEntry(index, { sellingPrice: val === '' ? 0 : (parseFloat(val) || 0) });
+                        const sellingPrice = val === '' ? 0 : (parseFloat(val) || 0);
+                        updateEntry(index, { sellingPrice });
+                        // Mark as manually set when user types
+                        if (val !== '') {
+                          setSellingPriceManuallySet({ ...sellingPriceManuallySet, [index]: true });
+                        }
                       }}
                       className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
                       required

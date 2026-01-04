@@ -128,8 +128,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto py-3 md:py-4">
-            <div className="px-2 md:px-2 space-y-2">
+          <nav className="flex-1 overflow-y-auto py-2 md:py-2">
+            <div className="px-2 md:px-2 space-y-1">
               {filteredMenuItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
@@ -138,13 +138,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     key={item.href}
                     href={item.href}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center px-4 md:px-4 py-3.5 md:py-3 text-sm md:text-sm font-medium rounded-lg transition-colors min-h-[44px] ${
+                    className={`flex items-center px-3 md:px-3 py-2 md:py-2 text-xs md:text-sm font-medium rounded-lg transition-colors min-h-[36px] ${
                       active
                         ? 'bg-blue-400 text-white shadow-md'
                         : 'text-gray-200 hover:bg-blue-400/30 hover:text-white'
                     }`}
                   >
-                    <Icon className="mr-3 md:mr-3 h-5 w-5 md:h-5 md:w-5 flex-shrink-0" />
+                    <Icon className="mr-2 md:mr-2 h-4 w-4 md:h-4 md:w-4 flex-shrink-0" />
                     <span className="truncate">{item.name}</span>
                   </Link>
                 );
