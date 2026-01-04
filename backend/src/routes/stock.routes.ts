@@ -9,10 +9,10 @@ import { authenticate, requireRole } from '../middleware/auth.middleware';
 
 const router = express.Router();
 
-router.post('/add', authenticate, requireRole('ADMIN'), addStock);
-router.post('/adjust', authenticate, requireRole('ADMIN'), adjustStock);
-router.get('/entries', authenticate, requireRole('ADMIN'), getStockEntries);
-router.get('/adjustments', authenticate, requireRole('ADMIN'), getStockAdjustments);
+router.post('/add', authenticate, requireRole('ADMIN', 'SALES'), addStock);
+router.post('/adjust', authenticate, requireRole('ADMIN', 'SALES'), adjustStock);
+router.get('/entries', authenticate, requireRole('ADMIN', 'SALES'), getStockEntries);
+router.get('/adjustments', authenticate, requireRole('ADMIN', 'SALES'), getStockAdjustments);
 
 export default router;
 

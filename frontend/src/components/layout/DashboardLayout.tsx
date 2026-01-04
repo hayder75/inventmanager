@@ -59,6 +59,8 @@ const salesMenuItems: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'New Sale', href: '/sales/new', icon: ShoppingCart },
   { name: 'Sales', href: '/sales', icon: FileText },
+  { name: 'Add Stock', href: '/stock/add', icon: Archive },
+  { name: 'Stock Adjustments', href: '/stock/adjustments', icon: Archive },
   { name: 'Expense Tracker', href: '/expenses/tracker', icon: FileText },
   { name: 'Contacts', href: '/contacts', icon: Users },
   { name: 'Products', href: '/products', icon: Package },
@@ -208,8 +210,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Page content */}
         <main className="p-3 sm:p-4 md:p-6 relative min-h-screen pb-20">{children}</main>
-        {/* Easy Tech Branding - Hidden on mobile */}
-        <div className="hidden md:block fixed bottom-4 right-4 z-10">
+        {/* Easy Tech Branding - Hidden on mobile, centered at bottom */}
+        <div className="hidden md:block fixed bottom-4 left-1/2 transform -translate-x-1/2 z-10">
           <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-200">
             <p className="text-lg font-bold" style={{ color: '#0082FB' }}>
               Easy Tech
