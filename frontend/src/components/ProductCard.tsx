@@ -1,6 +1,3 @@
-'use client';
-
-import { useState } from 'react';
 import { ShoppingCart } from 'lucide-react';
 
 interface ProductCardProps {
@@ -11,67 +8,16 @@ interface ProductCardProps {
     price: number | null;
     category: string | null;
     unit: string | null;
-    showImageOnWebsite?: boolean;
-    showPriceOnWebsite?: boolean;
 }
 
 export default function ProductCard({ product }: { product: ProductCardProps }) {
-    // Check if image should be shown
-    const showImage = product.showImageOnWebsite !== false; // Default to true if not specified
-    // Only initialize loading state if we actually have an imageUrl and should show image
-    const hasImageUrl = showImage && product.imageUrl && product.imageUrl.trim() !== '';
-    const [imageError, setImageError] = useState(false);
-    const [imageLoading, setImageLoading] = useState(hasImageUrl);
-    const [imageLoaded, setImageLoaded] = useState(false);
-
-    // Construct image URL properly
-    const getImageUrl = () => {
-        if (!product.imageUrl || product.imageUrl.trim() === '') return null;
-        if (product.imageUrl.startsWith('http')) return product.imageUrl;
-        
-        // Use API URL from environment or construct from current origin
-        let baseUrl = process.env.NEXT_PUBLIC_API_URL || 
-                     (typeof window !== 'undefined' ? window.location.origin.replace(':3000', ':5000') : 'http://localhost:5000');
-        
-        // Remove /api suffix if present, as static files are served at root level
-        if (baseUrl.endsWith('/api')) {
-            baseUrl = baseUrl.replace(/\/api$/, '');
-        }
-        
-        // Ensure imageUrl starts with /
-        const imagePath = product.imageUrl.startsWith('/') ? product.imageUrl : `/${product.imageUrl}`;
-        return `${baseUrl}${imagePath}`;
-    };
-
-    const imageUrl = getImageUrl();
-    // Only show image container AFTER image successfully loads (not while loading, not on error)
-    const shouldShowImage = imageUrl && imageLoaded && !imageError;
-
     return (
         <div className="group bg-white rounded-2xl overflow-hidden border-2 border-primary-200 hover:border-brand-light/50 transition-all duration-300 hover:shadow-card hover:-translate-y-1 shadow-sm">
-            {/* Preload image invisibly to check if it exists */}
-            {imageUrl && !imageLoaded && !imageError && (
-                <img
-                    src={imageUrl}
-                    alt=""
-                    style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }}
-                    onLoad={() => {
-                        setImageLoading(false);
-                        setImageLoaded(true);
-                    }}
-                    onError={() => {
-                        setImageError(true);
-                        setImageLoading(false);
-                        setImageLoaded(false);
-                    }}
-                />
-            )}
-
-            {/* Image Container - Only show AFTER image successfully loads */}
-            {shouldShowImage && (
+            {/* Image Container - Only show if image exists */}
+            {product.imageUrl && (
                 <div className="relative h-64 w-full bg-primary-50 overflow-hidden">
                     <img
-                        src={imageUrl!}
+                        src={product.imageUrl.startsWith('http') ? product.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${product.imageUrl}`}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
@@ -89,9 +35,9 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
             )}
 
             {/* Content */}
-            <div className={`p-6 ${!shouldShowImage ? 'pt-6' : ''}`}>
+            <div className={`p-6 ${!product.imageUrl ? 'pt-6' : ''}`}>
                 {/* Category Badge - Show here if no image */}
-                {!shouldShowImage && product.category && (
+                {!product.imageUrl && product.category && (
                     <div className="mb-3">
                         <span className="inline-block px-3 py-1 bg-primary-50 rounded-full text-xs font-semibold text-primary-700">
                             {product.category}
@@ -103,7 +49,7 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
                         {product.name}
                     </h3>
                     <div className="text-right">
-                    {product.showPriceOnWebsite !== false && product.price && (
+                    {product.price && (
                         <div>
                             <span className="text-lg font-bold text-brand block">
                                 ${parseFloat(product.price.toString()).toFixed(2)}
@@ -118,11 +64,6 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
                                     per {product.unit === 'pcs' ? 'piece' : product.unit}
                                 </span>
                             )}
-                        </div>
-                    )}
-                    {product.showPriceOnWebsite === false && (
-                        <div className="text-sm text-primary-500 italic">
-                            Price on request
                         </div>
                     )}
                     </div>

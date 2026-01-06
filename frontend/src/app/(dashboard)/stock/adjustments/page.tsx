@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import { useAuth } from '@/context/AuthContext';
-import { Plus, Search, Check, X } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -17,12 +16,8 @@ interface Adjustment {
   qtyChange: number;
   reason: string;
   notes: string | null;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  approvedBy: string | null;
-  approvedAt: string | null;
   createdAt: string;
   creator: { name: string };
-  approver: { name: string } | null;
 }
 
 interface Product {
@@ -33,7 +28,6 @@ interface Product {
 }
 
 export default function StockAdjustmentsPage() {
-  const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [adjustments, setAdjustments] = useState<Adjustment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -110,39 +104,6 @@ export default function StockAdjustmentsPage() {
     }
   };
 
-  const handleApprove = async (adjustmentId: string) => {
-    if (!confirm('Are you sure you want to approve this stock adjustment?')) return;
-    try {
-      await api.patch(`/api/stock/adjustments/${adjustmentId}/approve`);
-      fetchAdjustments();
-    } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to approve adjustment');
-    }
-  };
-
-  const handleReject = async (adjustmentId: string) => {
-    if (!confirm('Are you sure you want to reject this stock adjustment?')) return;
-    try {
-      await api.patch(`/api/stock/adjustments/${adjustmentId}/reject`);
-      fetchAdjustments();
-    } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to reject adjustment');
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>;
-      case 'APPROVED':
-        return <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Approved</span>;
-      case 'REJECTED':
-        return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Rejected</span>;
-      default:
-        return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">{status}</span>;
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -181,11 +142,7 @@ export default function StockAdjustmentsPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Change</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">By</th>
-                {user?.role === 'ADMIN' && (
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -212,37 +169,7 @@ export default function StockAdjustmentsPage() {
                   </td>
                   <td className="px-6 py-4">{adj.reason.replace('_', ' ')}</td>
                   <td className="px-6 py-4">{adj.notes || 'N/A'}</td>
-                  <td className="px-6 py-4">{getStatusBadge(adj.status)}</td>
-                  <td className="px-6 py-4">
-                    <div>{adj.creator.name}</div>
-                    {adj.approver && (
-                      <div className="text-xs text-gray-500">
-                        Approved by: {adj.approver.name}
-                      </div>
-                    )}
-                  </td>
-                  {user?.role === 'ADMIN' && (
-                    <td className="px-6 py-4">
-                      {adj.status === 'PENDING' && (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleApprove(adj.id)}
-                            className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-1"
-                          >
-                            <Check className="w-3 h-3" />
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleReject(adj.id)}
-                            className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 flex items-center gap-1"
-                          >
-                            <X className="w-3 h-3" />
-                            Reject
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  )}
+                  <td className="px-6 py-4">{adj.creator.name}</td>
                 </tr>
               ))}
             </tbody>

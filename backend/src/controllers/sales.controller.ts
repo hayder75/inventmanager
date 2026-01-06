@@ -455,11 +455,6 @@ export async function getBankDeposits(req: AuthRequest, res: Response) {
       bankType: { not: null }, // Only bank transfers, exclude cash
     };
 
-    // Filter by salesperson if SALES role
-    if (req.user?.role === 'SALES') {
-      where.salespersonId = req.user.id;
-    }
-
     if (startDate || endDate) {
       where.createdAt = {};
       if (startDate) where.createdAt.gte = new Date(startDate as string);

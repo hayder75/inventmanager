@@ -10,20 +10,14 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Build where clause for sales - filter by salesperson if SALES role
-    const salesWhere: any = {
-      createdAt: {
-        gte: today,
-        lt: tomorrow,
-      },
-    };
-    if (req.user?.role === 'SALES') {
-      salesWhere.salespersonId = req.user.id;
-    }
-
     // Today's sales
     const todaySales = await prisma.sale.findMany({
-      where: salesWhere,
+      where: {
+        createdAt: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
     });
 
     const totalSales = todaySales.reduce(
@@ -60,50 +54,20 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
       p => p.stockQty <= p.lowStockAlert
     );
 
-    // Build where clause for payments - filter by salesperson if SALES role
-    const paymentsWhere: any = {
-      createdAt: {
-        gte: today,
-        lt: tomorrow,
-      },
-    };
-    if (req.user?.role === 'SALES') {
-      paymentsWhere.salespersonId = req.user.id;
-    }
-
-    // Bank collected (from PaymentReceived)
-    const todayBankPayments = await prisma.paymentReceived.findMany({
+    // Bank collected (from payments)
+    const todayPayments = await prisma.paymentReceived.findMany({
       where: {
-        ...paymentsWhere,
+        createdAt: {
+          gte: today,
+          lt: tomorrow,
+        },
         method: 'BANK_TRANSFER',
       },
     });
-    const bankCollectedFromPayments = todayBankPayments.reduce(
+    const bankCollected = todayPayments.reduce(
       (sum, payment) => sum.plus(payment.amount),
       new Decimal(0)
     );
-
-    // Also include bank transfers from sales (walk-in bank transfers)
-    const bankCollectedFromSales = todaySales
-      .filter(sale => sale.bankType && sale.totalPaid.gt(0))
-      .reduce((sum, sale) => sum.plus(sale.totalPaid), new Decimal(0));
-
-    const bankCollected = bankCollectedFromPayments.plus(bankCollectedFromSales);
-
-    // Cash collected from PaymentReceived (credit customer payments)
-    const todayCashPayments = await prisma.paymentReceived.findMany({
-      where: {
-        ...paymentsWhere,
-        method: 'CASH',
-      },
-    });
-    const cashCollectedFromPayments = todayCashPayments.reduce(
-      (sum, payment) => sum.plus(payment.amount),
-      new Decimal(0)
-    );
-
-    // Total cash collected = cash from sales + cash from payments
-    const totalCashCollected = cashCollected.plus(cashCollectedFromPayments);
 
     // Today's expenses
     const todayExpenses = await prisma.expense.findMany({
@@ -125,13 +89,8 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
     // Total sales count today
     const totalBills = todaySales.length;
 
-    // Recent sales (last 5) - filter by role
-    const recentSalesWhere: any = {};
-    if (req.user?.role === 'SALES') {
-      recentSalesWhere.salespersonId = req.user.id;
-    }
+    // Recent sales (last 5)
     const recentSales = await prisma.sale.findMany({
-      where: recentSalesWhere,
       take: 5,
       orderBy: {
         createdAt: 'desc',
@@ -169,7 +128,7 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
     res.json({
       today: {
         totalSales: totalSales.toString(),
-        cashCollected: totalCashCollected.toString(),
+        cashCollected: cashCollected.toString(),
         bankCollected: bankCollected.toString(),
         creditSales: creditSales.toString(),
         profit: profit.toString(),

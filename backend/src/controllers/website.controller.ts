@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 
 export const upload = multer({
   storage: storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -36,13 +36,11 @@ export const upload = multer({
   }
 });
 
-// Get public products (no auth required) - only show products with showOnWebsite = true
+// Get public products (no auth required) - from inventory where showOnWebsite = true
 export async function getPublicProducts(req: any, res: Response) {
   try {
     const products = await prisma.product.findMany({
-      where: {
-        showOnWebsite: true, // Only show products marked as visible
-      },
+      where: { showOnWebsite: true },
       orderBy: { name: 'asc' },
       select: {
         id: true,
@@ -53,8 +51,6 @@ export async function getPublicProducts(req: any, res: Response) {
         category: true,
         stockQty: true,
         unit: true,
-        showImageOnWebsite: true,
-        showPriceOnWebsite: true,
       },
     });
     // Transform to match frontend expectations
@@ -62,13 +58,11 @@ export async function getPublicProducts(req: any, res: Response) {
       id: product.id,
       name: product.name,
       description: product.description,
-      imageUrl: product.showImageOnWebsite ? product.imageUrl : null,
-      price: product.showPriceOnWebsite ? product.sellingPrice : null,
+      imageUrl: product.imageUrl,
+      price: product.sellingPrice,
       category: product.category,
       stockQty: product.stockQty,
       unit: product.unit,
-      showImageOnWebsite: product.showImageOnWebsite,
-      showPriceOnWebsite: product.showPriceOnWebsite,
     }));
     res.json(transformedProducts);
   } catch (error: any) {
@@ -76,13 +70,13 @@ export async function getPublicProducts(req: any, res: Response) {
   }
 }
 
-// Get new products (no auth required) - show all new products
+// Get new products (no auth required) - from inventory where showOnWebsite = true AND isNew = true
 export async function getNewProducts(req: any, res: Response) {
   try {
     const products = await prisma.product.findMany({
       where: { 
+        showOnWebsite: true,
         isNew: true,
-        // Show all new products regardless of showOnWebsite flag
       },
       orderBy: { createdAt: 'desc' },
       select: {
@@ -134,8 +128,6 @@ export async function getAllPublicProducts(req: AuthRequest, res: Response) {
         stockQty: true,
         unit: true,
         showOnWebsite: true,
-        showImageOnWebsite: true,
-        showPriceOnWebsite: true,
         isNew: true,
         notes: true,
       },
@@ -153,15 +145,13 @@ export async function updateProductWebsiteSettings(req: AuthRequest, res: Respon
       return res.status(403).json({ error: 'Admin access required' });
     }
     const { id } = req.params;
-    const { description, showOnWebsite, isNew, showImageOnWebsite, showPriceOnWebsite } = req.body;
+    const { description, showOnWebsite, isNew } = req.body;
     const imageUrl = req.file ? `/uploads/products/${req.file.filename}` : undefined;
 
     const updateData: any = {};
     if (description !== undefined) updateData.description = description;
     if (showOnWebsite !== undefined) updateData.showOnWebsite = showOnWebsite === 'true' || showOnWebsite === true;
     if (isNew !== undefined) updateData.isNew = isNew === 'true' || isNew === true;
-    if (showImageOnWebsite !== undefined) updateData.showImageOnWebsite = showImageOnWebsite === 'true' || showImageOnWebsite === true;
-    if (showPriceOnWebsite !== undefined) updateData.showPriceOnWebsite = showPriceOnWebsite === 'true' || showPriceOnWebsite === true;
     if (imageUrl) updateData.imageUrl = imageUrl;
 
     // If updating image, delete old image
@@ -188,8 +178,6 @@ export async function updateProductWebsiteSettings(req: AuthRequest, res: Respon
         category: true,
         stockQty: true,
         showOnWebsite: true,
-        showImageOnWebsite: true,
-        showPriceOnWebsite: true,
         isNew: true,
         notes: true,
       },
@@ -226,8 +214,6 @@ export async function toggleProductVisibility(req: AuthRequest, res: Response) {
         category: true,
         stockQty: true,
         showOnWebsite: true,
-        showImageOnWebsite: true,
-        showPriceOnWebsite: true,
         isNew: true,
         notes: true,
       },
