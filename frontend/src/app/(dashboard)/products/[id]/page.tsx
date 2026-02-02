@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 interface Product {
   id: string;
@@ -17,6 +18,7 @@ interface Product {
 }
 
 export default function ProductEditPage() {
+  const { user } = useAuth();
   const params = useParams();
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
@@ -171,13 +173,17 @@ export default function ProductEditPage() {
           />
         </div>
         <div className="flex justify-between">
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-          >
-            Delete Product
-          </button>
+          {user?.role === 'ADMIN' ? (
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Delete Product
+            </button>
+          ) : (
+            <div />
+          )}
           <div className="flex space-x-4">
             <button
               type="button"

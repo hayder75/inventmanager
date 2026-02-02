@@ -37,9 +37,9 @@ interface MenuItem {
 
 const adminMenuItems: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Add Stock', href: '/stock/add', icon: Archive, roles: ['ADMIN'] },
+  { name: 'Add Stock', href: '/stock/add', icon: Archive, roles: ['ADMIN', 'SALES'] },
   { name: 'Products', href: '/products', icon: Package, roles: ['ADMIN', 'SALES'] },
-  { name: 'Stock Adjustments', href: '/stock/adjustments', icon: Archive, roles: ['ADMIN'] },
+  { name: 'Stock Adjustments', href: '/stock/adjustments', icon: Archive, roles: ['ADMIN', 'SALES'] },
   { name: 'Today\'s Sales', href: '/sales/today', icon: FileText, roles: ['ADMIN'] },
   { name: 'Bank Deposits', href: '/bank-deposits', icon: CreditCard, roles: ['ADMIN'] },
   { name: 'Cash Flow', href: '/cash-flow', icon: DollarSign, roles: ['ADMIN', 'SALES'] },
@@ -58,10 +58,12 @@ const adminMenuItems: MenuItem[] = [
 const salesMenuItems: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'New Sale', href: '/sales/new', icon: ShoppingCart },
+  { name: 'Add Stock', href: '/stock/add', icon: Archive },
+  { name: 'Products', href: '/products', icon: Package },
+  { name: 'Stock Adjustments', href: '/stock/adjustments', icon: Archive },
   { name: 'Sales', href: '/sales', icon: FileText },
   { name: 'Expense Tracker', href: '/expenses/tracker', icon: FileText },
   { name: 'Contacts', href: '/contacts', icon: Users },
-  { name: 'Products', href: '/products', icon: Package },
   { name: 'Payments Received', href: '/payments', icon: CreditCard },
 ];
 
@@ -87,7 +89,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // This prevents /sales from matching /sales/new
     if (pathname?.startsWith(href + '/')) {
       // Check if there's a more specific menu item that matches
-      const moreSpecificMatch = filteredMenuItems.find(item => 
+      const moreSpecificMatch = filteredMenuItems.find(item =>
         item.href !== href && pathname?.startsWith(item.href)
       );
       // Only return true if no more specific match exists
@@ -108,9 +110,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-64 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 left-0 z-30 w-64 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
         style={{ backgroundColor: '#0064E0' }}
       >
         <div className="flex flex-col h-full">
@@ -136,11 +137,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     key={item.href}
                     href={item.href}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center px-4 md:px-4 py-3.5 md:py-3 text-sm md:text-sm font-medium rounded-lg transition-colors min-h-[44px] ${
-                      active
+                    className={`flex items-center px-4 md:px-4 py-3.5 md:py-3 text-sm md:text-sm font-medium rounded-lg transition-colors min-h-[44px] ${active
                         ? 'bg-blue-400 text-white shadow-md'
                         : 'text-gray-200 hover:bg-blue-400/30 hover:text-white'
-                    }`}
+                      }`}
                   >
                     <Icon className="mr-3 md:mr-3 h-5 w-5 md:h-5 md:w-5 flex-shrink-0" />
                     <span className="truncate">{item.name}</span>

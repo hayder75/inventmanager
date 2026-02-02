@@ -113,7 +113,7 @@ export default function ProductsPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Selling Price</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                {user?.role === 'ADMIN' && (
+                {(user?.role === 'ADMIN' || user?.role === 'SALES') && (
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 )}
               </tr>
@@ -146,7 +146,7 @@ export default function ProductsPage() {
                       </span>
                     )}
                   </td>
-                  {user?.role === 'ADMIN' && (
+                  {(user?.role === 'ADMIN' || user?.role === 'SALES') && (
                     <td className="px-6 py-4">
                       <Link
                         href={`/products/${product.id}`}
@@ -171,7 +171,7 @@ export default function ProductsPage() {
                   <h3 className="text-base font-bold text-gray-900 truncate">{product.name}</h3>
                   <p className="text-xs text-gray-500">{product.code || 'No code'}</p>
                 </div>
-                {user?.role === 'ADMIN' && (
+                {(user?.role === 'ADMIN' || user?.role === 'SALES') && (
                   <Link
                     href={`/products/${product.id}`}
                     className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center ml-2 flex-shrink-0"
