@@ -49,7 +49,8 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
                         {product.name}
                     </h3>
                     <div className="text-right">
-                    {product.price && (
+                        {/* Price hidden as per request */}
+                        {/* {product.price && (
                         <div>
                             <span className="text-lg font-bold text-brand block">
                                 ${parseFloat(product.price.toString()).toFixed(2)}
@@ -65,7 +66,7 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
                                 </span>
                             )}
                         </div>
-                    )}
+                    )} */}
                     </div>
                 </div>
 
