@@ -20,6 +20,7 @@ import {
   Bell,
   LogOut,
   ChevronRight,
+  ChevronDown,
   Wallet,
   FileText,
   BarChart3,
@@ -31,71 +32,140 @@ import {
 interface MenuItem {
   name: string;
   href: string;
-  icon: any;
+  icon?: any;
   roles?: ('ADMIN' | 'SALES')[];
 }
 
-const adminMenuItems: MenuItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Add Stock', href: '/stock/add', icon: Archive, roles: ['ADMIN', 'SALES'] },
-  { name: 'Products', href: '/products', icon: Package, roles: ['ADMIN', 'SALES'] },
-  { name: 'Stock Adjustments', href: '/stock/adjustments', icon: Archive, roles: ['ADMIN', 'SALES'] },
-  { name: 'Today\'s Sales', href: '/sales/today', icon: FileText, roles: ['ADMIN'] },
-  { name: 'Bank Deposits', href: '/bank-deposits', icon: CreditCard, roles: ['ADMIN'] },
-  { name: 'Cash Flow', href: '/cash-flow', icon: DollarSign, roles: ['ADMIN', 'SALES'] },
-  { name: 'Profit & Loss', href: '/profit-loss', icon: TrendingDown, roles: ['ADMIN'] },
-  { name: 'Credit Users', href: '/companies', icon: Building2, roles: ['ADMIN'] },
-  { name: 'Contacts', href: '/contacts', icon: Users, roles: ['ADMIN', 'SALES'] },
-  { name: 'Suppliers Owed', href: '/suppliers/owed', icon: Wallet, roles: ['ADMIN'] },
-  { name: 'Payments Received', href: '/payments', icon: CreditCard, roles: ['ADMIN', 'SALES'] },
-  { name: 'Expense Reports', href: '/expenses/reports', icon: FileText, roles: ['ADMIN'] },
-  { name: 'Sales Performance', href: '/dashboard/performance', icon: BarChart3, roles: ['ADMIN'] },
-  { name: 'Users', href: '/users', icon: Users, roles: ['ADMIN'] },
-  { name: 'Website', href: '/website', icon: Globe, roles: ['ADMIN'] },
-  { name: 'Settings', href: '/settings', icon: Settings },
+interface MenuCategory {
+  title: string;
+  icon: any;
+  items: MenuItem[];
+  roles?: ('ADMIN' | 'SALES')[];
+}
+
+const adminMenuCategories: MenuCategory[] = [
+  {
+    title: 'Dashboard',
+    icon: LayoutDashboard,
+    items: [{ name: 'Overview', href: '/dashboard', icon: LayoutDashboard }]
+  },
+  {
+    title: 'Inventory',
+    icon: Archive,
+    items: [
+      { name: 'Add Stock', href: '/stock/add', icon: Archive },
+      { name: 'Stock Adjustment', href: '/stock/adjustments', icon: Archive },
+      { name: 'Products', href: '/products', icon: Package },
+    ]
+  },
+  {
+    title: 'Sales',
+    icon: ShoppingCart,
+    items: [
+      { name: 'Today Sales', href: '/sales/today', icon: FileText },
+      { name: 'Payment Received', href: '/payments', icon: CreditCard },
+      { name: 'Credit Users', href: '/companies', icon: Building2 },
+    ]
+  },
+  {
+    title: 'Finance',
+    icon: DollarSign,
+    items: [
+      { name: 'Cash Flow', href: '/cash-flow', icon: DollarSign },
+      { name: 'Bank Deposit', href: '/bank-deposits', icon: CreditCard },
+      { name: 'Profit & Loss', href: '/profit-loss', icon: TrendingDown },
+      { name: 'Expense Report', href: '/expenses/reports', icon: FileText },
+      { name: 'Sales Performance', href: '/dashboard/performance', icon: BarChart3 },
+    ]
+  },
+  {
+    title: 'Suppliers',
+    icon: Wallet,
+    items: [
+      { name: 'Suppliers Owed', href: '/suppliers/owed', icon: Wallet },
+      { name: 'Contacts', href: '/contacts', icon: Users },
+    ]
+  },
+  {
+    title: 'System',
+    icon: Settings,
+    items: [
+      { name: 'Users Management', href: '/users', icon: Users },
+      { name: 'Website Settings', href: '/website', icon: Globe },
+      { name: 'System Settings', href: '/settings', icon: Settings },
+    ]
+  }
 ];
 
-const salesMenuItems: MenuItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'New Sale', href: '/sales/new', icon: ShoppingCart },
-  { name: 'Add Stock', href: '/stock/add', icon: Archive },
-  { name: 'Products', href: '/products', icon: Package },
-  { name: 'Stock Adjustments', href: '/stock/adjustments', icon: Archive },
-  { name: 'Sales', href: '/sales', icon: FileText },
-  { name: 'Expense Tracker', href: '/expenses/tracker', icon: FileText },
-  { name: 'Contacts', href: '/contacts', icon: Users },
-  { name: 'Payments Received', href: '/payments', icon: CreditCard },
+const salesMenuCategories: MenuCategory[] = [
+  {
+    title: 'Dashboard',
+    icon: LayoutDashboard,
+    items: [{ name: 'Overview', href: '/dashboard' }]
+  },
+  {
+    title: 'Inventory',
+    icon: Archive,
+    items: [
+      { name: 'Add Stock', href: '/stock/add' },
+      { name: 'Products', href: '/products' },
+      { name: 'Stock Adjustments', href: '/stock/adjustments' },
+    ]
+  },
+  {
+    title: 'Sales',
+    icon: ShoppingCart,
+    items: [
+      { name: 'New Sale', href: '/sales/new' },
+      { name: 'Sales List', href: '/sales' },
+      { name: 'Payments Received', href: '/payments' },
+    ]
+  },
+  {
+    title: 'Suppliers & Contacts',
+    icon: Users,
+    items: [
+      { name: 'Contacts', href: '/contacts' },
+    ]
+  },
+  {
+    title: 'Expenses',
+    icon: FileText,
+    items: [
+      { name: 'Expense Tracker', href: '/expenses/tracker' },
+    ]
+  }
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [openCategories, setOpenCategories] = useState<string[]>(['Dashboard', 'Inventory']);
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
-  const menuItems = user?.role === 'ADMIN' ? adminMenuItems : salesMenuItems;
-  const filteredMenuItems = menuItems.filter(
-    (item) => !item.roles || item.roles.includes(user?.role || 'SALES')
-  );
+  const categories = user?.role === 'ADMIN' ? adminMenuCategories : salesMenuCategories;
 
   const handleLogout = () => {
     logout();
     router.push('/login');
   };
 
+  const toggleCategory = (title: string) => {
+    setOpenCategories(prev =>
+      prev.includes(title)
+        ? prev.filter(t => t !== title)
+        : [...prev, title]
+    );
+  };
+
   const isActive = (href: string) => {
     if (pathname === href) return true;
-    // Only match sub-routes if the href is not a parent of another menu item
-    // This prevents /sales from matching /sales/new
-    if (pathname?.startsWith(href + '/')) {
-      // Check if there's a more specific menu item that matches
-      const moreSpecificMatch = filteredMenuItems.find(item =>
-        item.href !== href && pathname?.startsWith(item.href)
-      );
-      // Only return true if no more specific match exists
-      return !moreSpecificMatch;
-    }
     return false;
+  };
+
+  const isCategoryActive = (category: MenuCategory) => {
+    return category.items.some(item => pathname === item.href);
   };
 
   return (
@@ -116,7 +186,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-14 md:h-16 px-3 md:px-4 border-b border-gray-800">
+          <div className="flex items-center justify-between h-14 md:h-16 px-3 md:px-4 border-b border-white/10">
             <h1 className="text-base md:text-xl font-bold truncate">Real-Bright-Trading</h1>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -127,47 +197,81 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto py-3 md:py-4">
-            <div className="px-2 md:px-2 space-y-2">
-              {filteredMenuItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.href);
+          <nav className="flex-1 overflow-y-auto py-3 md:py-4 scrollbar-hide">
+            <div className="px-3 space-y-1">
+              {categories.map((category) => {
+                const Icon = category.icon;
+                const isOpen = openCategories.includes(category.title);
+                const categoryActive = isCategoryActive(category);
+
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center px-4 md:px-4 py-3.5 md:py-3 text-sm md:text-sm font-medium rounded-lg transition-colors min-h-[44px] ${active
-                        ? 'bg-blue-400 text-white shadow-md'
-                        : 'text-gray-200 hover:bg-blue-400/30 hover:text-white'
-                      }`}
-                  >
-                    <Icon className="mr-3 md:mr-3 h-5 w-5 md:h-5 md:w-5 flex-shrink-0" />
-                    <span className="truncate">{item.name}</span>
-                  </Link>
+                  <div key={category.title} className="space-y-1">
+                    <button
+                      onClick={() => toggleCategory(category.title)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold rounded-xl transition-all ${categoryActive
+                        ? 'bg-white/10 text-white'
+                        : 'text-blue-100 hover:bg-white/5 hover:text-white'
+                        }`}
+                    >
+                      <div className="flex items-center">
+                        <Icon className={`mr-3 h-5 w-5 transition-transform ${categoryActive ? 'scale-110' : ''}`} />
+                        <span>{category.title}</span>
+                      </div>
+                      {isOpen ? (
+                        <ChevronDown className="h-4 w-4 opacity-50" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 opacity-50" />
+                      )}
+                    </button>
+
+                    {/* Dropdown Items */}
+                    {isOpen && (
+                      <div className="ml-4 pl-1 mt-1 space-y-1 border-l border-white/10 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {category.items.map((item) => {
+                          const active = isActive(item.href);
+                          const ItemIcon = item.icon;
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={() => setSidebarOpen(false)}
+                              className={`flex items-center px-4 py-2 text-xs font-medium rounded-lg transition-all ${active
+                                ? 'bg-blue-400 text-white shadow-sm'
+                                : 'text-blue-100 hover:bg-white/10 hover:text-white'
+                                }`}
+                            >
+                              {ItemIcon && <ItemIcon className="mr-2 h-4 w-4 opacity-70" />}
+                              <span className="truncate">{item.name}</span>
+                              {active && <div className="ml-auto w-1 h-1 bg-white rounded-full" />}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
           </nav>
 
           {/* User info */}
-          <div className="border-t border-gray-800 p-3 md:p-4">
-            <div className="flex items-center mb-2 md:mb-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-400 flex items-center justify-center shadow-md flex-shrink-0">
-                <span className="text-xs md:text-sm font-medium text-white">
+          <div className="border-t border-white/10 p-4 bg-black/5">
+            <div className="flex items-center mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-400 flex items-center justify-center shadow-lg border-2 border-white/20 flex-shrink-0">
+                <span className="text-sm font-bold text-white">
                   {user?.name?.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <div className="ml-2 md:ml-3 flex-1 min-w-0">
-                <p className="text-xs md:text-sm font-medium truncate">{user?.name}</p>
-                <p className="text-xs text-gray-400">{user?.role}</p>
+              <div className="ml-3 flex-1 min-w-0">
+                <p className="text-sm font-bold truncate leading-none mb-1">{user?.name}</p>
+                <p className="text-[10px] text-blue-200 uppercase tracking-widest font-bold">{user?.role}</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center px-3 md:px-4 py-2 text-xs md:text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              className="w-full flex items-center justify-center px-4 py-2.5 text-sm font-bold text-white bg-red-500/80 hover:bg-red-600 rounded-xl transition-all shadow-md active:scale-95"
             >
-              <LogOut className="mr-2 md:mr-3 h-3 w-3 md:h-4 md:w-4" />
+              <LogOut className="mr-3 h-4 w-4" />
               Logout
             </button>
           </div>
