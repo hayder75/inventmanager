@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -257,7 +257,7 @@ model PaymentReceived {
 // Supplier Payments
 model SupplierPayment {
   id            String   @id @default(uuid())
-  stockEntryIds String? // SQLite doesn't support arrays, use string and parse JSON if needed, or simple string
+  stockEntryIds String[] @map("stock_entry_ids")
   amount        Decimal  
   method        PaymentMethod
   supplierName  String   @map("supplier_name")

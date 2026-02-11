@@ -101,7 +101,7 @@ export async function recordSupplierPayment(req: AuthRequest, res: Response) {
     // Create payment record
     const payment = await prisma.supplierPayment.create({
       data: {
-        stockEntryIds: JSON.stringify(stockEntryIds),
+        stockEntryIds,
         amount: new Decimal(amount),
         method,
         supplierName: supplierName || entries[0].supplierName,
