@@ -139,7 +139,7 @@ const salesMenuCategories: MenuCategory[] = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [openCategory, setOpenCategory] = useState<string | null>('Inventory');
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
