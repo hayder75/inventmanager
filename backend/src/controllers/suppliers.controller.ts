@@ -93,21 +93,25 @@ export async function recordSupplierPayment(req: AuthRequest, res: Response) {
     });
 
     if (new Decimal(amount).gt(totalOwed)) {
-      return res.status(400).json({ 
-        error: `Payment amount (${amount}) exceeds total owed (${totalOwed})` 
+      return res.status(400).json({
+        error: `Payment amount (${amount}) exceeds total owed (${totalOwed})`
       });
     }
 
     // Create payment record
     const payment = await prisma.supplierPayment.create({
       data: {
-        stockEntryIds,
+        stockEntryIds: JSON.stringify(stockEntryIds),
         amount: new Decimal(amount),
         method,
         supplierName: supplierName || entries[0].supplierName,
         notes: notes || null,
+        stockEntries: {
+          connect: stockEntryIds.map((id: string) => ({ id })),
+        },
       },
     });
+
 
     res.status(201).json(payment);
   } catch (error: any) {

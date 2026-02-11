@@ -17,8 +17,13 @@ export async function getProducts(req: AuthRequest, res: Response) {
     }
 
     if (category) {
-      where.category = category as string;
+      if (category === 'Uncategorized') {
+        where.category = null;
+      } else {
+        where.category = category as string;
+      }
     }
+
 
     if (lowStock === 'true') {
       const products = await prisma.product.findMany({ where });
@@ -136,8 +141,8 @@ export async function deleteProduct(req: AuthRequest, res: Response) {
 
     // Check if product has been used in sales
     if (product.saleItems.length > 0) {
-      return res.status(400).json({ 
-        error: 'Cannot delete product that has been used in sales. Consider marking it as inactive instead.' 
+      return res.status(400).json({
+        error: 'Cannot delete product that has been used in sales. Consider marking it as inactive instead.'
       });
     }
 
@@ -166,8 +171,8 @@ export async function deleteProduct(req: AuthRequest, res: Response) {
       return res.status(404).json({ error: 'Product not found' });
     }
     if (error.code === 'P2003') {
-      return res.status(400).json({ 
-        error: 'Cannot delete product due to existing relationships. Please contact support.' 
+      return res.status(400).json({
+        error: 'Cannot delete product due to existing relationships. Please contact support.'
       });
     }
     res.status(500).json({ error: error.message || 'Internal server error' });
@@ -200,5 +205,56 @@ export async function getCategories(req: AuthRequest, res: Response) {
     res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+export async function getProductMetrics(req: AuthRequest, res: Response) {
+  try {
+    const products = await prisma.product.findMany();
+
+    const metricsByCategory: Record<string, {
+      count: number;
+      stockLevel: number;
+      totalCost: number;
+      totalSelling: number;
+    }> = {};
+
+    let grandTotalCost = 0;
+    let grandTotalSelling = 0;
+
+    products.forEach(p => {
+      const category = p.category || 'Uncategorized';
+      if (!metricsByCategory[category]) {
+        metricsByCategory[category] = { count: 0, stockLevel: 0, totalCost: 0, totalSelling: 0 };
+      }
+
+      const costValue = Number(p.costPrice) * p.stockQty;
+      const sellingValue = Number(p.sellingPrice) * p.stockQty;
+
+      metricsByCategory[category].count++;
+      metricsByCategory[category].stockLevel += p.stockQty;
+      metricsByCategory[category].totalCost += costValue;
+      metricsByCategory[category].totalSelling += sellingValue;
+
+      grandTotalCost += costValue;
+      grandTotalSelling += sellingValue;
+    });
+
+    const categories = Object.keys(metricsByCategory).map(name => ({
+      name,
+      ...metricsByCategory[name]
+    })).sort((a, b) => a.name.localeCompare(b.name));
+
+    res.json({
+      categories,
+      grandTotalCost,
+      grandTotalSelling,
+      totalProducts: products.length,
+      totalStockItems: products.reduce((acc, p) => acc + p.stockQty, 0)
+    });
+  } catch (error: any) {
+    console.error('Get product metrics error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 
 

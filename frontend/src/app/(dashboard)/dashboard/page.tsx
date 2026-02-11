@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  Package, 
-  AlertCircle, 
+import {
+  DollarSign,
+  TrendingUp,
+  Package,
+  AlertCircle,
   TrendingDown,
   Users,
   ShoppingCart,
@@ -93,6 +93,30 @@ export default function DashboardPage() {
           {isAdmin ? 'Overview of your business today' : 'Your sales overview for today'}
         </p>
       </div>
+
+      {isAdmin && (
+        <Link
+          href="/dashboard/products-metrics"
+          className="block w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white p-4 md:p-6 rounded-xl shadow-lg transition-all transform hover:scale-[1.01] active:scale-[0.99] group overflow-hidden relative"
+        >
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                <Package className="h-6 w-6 md:h-8 md:w-8 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg md:text-xl font-bold">Products with Category and Total</h2>
+                <p className="text-blue-100 text-sm md:text-base">Overview of inventory distribution and total Birr value</p>
+              </div>
+
+            </div>
+            <ArrowUpRight className="h-6 w-6 opacity-50 group-hover:opacity-100 transition-opacity" />
+          </div>
+          {/* Subtle background pattern/glow */}
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all" />
+        </Link>
+      )}
+
 
       {stats && (
         <>
@@ -252,9 +276,9 @@ export default function DashboardPage() {
                                 {formatCurrency(sale.totalAmount)}
                               </p>
                               <p className="text-sm text-gray-600">
-                                {sale.salespersonName} • {new Date(sale.createdAt).toLocaleTimeString('en-US', { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit' 
+                                {sale.salespersonName} • {new Date(sale.createdAt).toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
                                 })}
                               </p>
                             </div>
@@ -266,40 +290,40 @@ export default function DashboardPage() {
                       <p className="text-gray-500 text-center py-4">No sales today</p>
                     )}
                   </div>
-          </div>
+                </div>
 
-          {/* Low Stock Alerts */}
-          {stats.lowStockAlerts > 0 && (
-            <div className="bg-white rounded-lg shadow">
+                {/* Low Stock Alerts */}
+                {stats.lowStockAlerts > 0 && (
+                  <div className="bg-white rounded-lg shadow">
                     <div className="p-4 md:p-6 border-b border-gray-200">
                       <div className="flex items-center justify-between">
-                <div className="flex items-center">
+                        <div className="flex items-center">
                           <AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-yellow-600 mr-2" />
                           <h2 className="text-base md:text-lg font-semibold text-gray-900">
                             Low Stock ({stats.lowStockAlerts})
-                  </h2>
+                          </h2>
                         </div>
                         <Link href="/products" className="text-xs md:text-sm text-yellow-600 hover:underline">
                           View all →
                         </Link>
-                </div>
-              </div>
-                    <div className="p-4 md:p-6">
-                <div className="space-y-3">
-                        {stats.lowStockProducts.slice(0, 5).map((product) => (
-                    <div
-                      key={product.id}
-                      className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg"
-                    >
-                      <div>
-                        <p className="font-medium text-gray-900">{product.name}</p>
-                        <p className="text-sm text-gray-600">
-                                Stock: {product.stockQty} | Alert: {product.lowStockAlert}
-                        </p>
                       </div>
-                      <Package className="h-5 w-5 text-yellow-600" />
                     </div>
-                  ))}
+                    <div className="p-4 md:p-6">
+                      <div className="space-y-3">
+                        {stats.lowStockProducts.slice(0, 5).map((product) => (
+                          <div
+                            key={product.id}
+                            className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg"
+                          >
+                            <div>
+                              <p className="font-medium text-gray-900">{product.name}</p>
+                              <p className="text-sm text-gray-600">
+                                Stock: {product.stockQty} | Alert: {product.lowStockAlert}
+                              </p>
+                            </div>
+                            <Package className="h-5 w-5 text-yellow-600" />
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -337,9 +361,9 @@ export default function DashboardPage() {
                               {formatCurrency(sale.totalAmount)}
                             </p>
                             <p className="text-sm text-gray-600">
-                              {new Date(sale.createdAt).toLocaleTimeString('en-US', { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
+                              {new Date(sale.createdAt).toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit'
                               })}
                             </p>
                           </div>
