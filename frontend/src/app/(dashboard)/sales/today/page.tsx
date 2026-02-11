@@ -235,7 +235,7 @@ export default function TodaySalesPage() {
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-sm text-gray-600">Total Received</p>
-          <p className="text-xl font-bold text-blue-600 mt-1">
+          <p className="text-xl font-bold text-dashboard mt-1">
             {formatCurrency(
               sales.reduce((sum, sale) => sum + parseFloat(sale.totalAmount), 0).toString()
             )}
@@ -364,7 +364,7 @@ export default function TodaySalesPage() {
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-dashboard">
                       {formatCurrency(item.subtotal)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

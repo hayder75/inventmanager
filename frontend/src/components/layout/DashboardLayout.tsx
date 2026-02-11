@@ -178,7 +178,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside
         className={`fixed inset-y-0 left-0 z-30 w-64 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
-        style={{ backgroundColor: '#0064E0' }}
+        style={{ backgroundColor: '#1921D9' }}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -205,8 +205,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <button
                       onClick={() => toggleCategory(category.title)}
                       className={`w-full flex items-center justify-between px-3 py-2.5 text-[15px] font-semibold rounded-xl transition-all ${categoryActive
-                        ? 'bg-white/10 text-white'
-                        : 'text-blue-100 hover:bg-white/5 hover:text-white'
+                        ? 'bg-white/20 text-white'
+                        : 'text-blue-100 hover:bg-white/10 hover:text-white'
                         }`}
                     >
                       <div className="flex items-center">
@@ -232,7 +232,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               href={item.href}
                               onClick={() => setSidebarOpen(false)}
                               className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all ${active
-                                ? 'bg-blue-400 text-white shadow-sm'
+                                ? 'bg-dashboard-light text-white shadow-sm'
                                 : 'text-blue-100 hover:bg-white/10 hover:text-white'
                                 }`}
                             >
@@ -311,7 +311,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Easy Tech Branding - Hidden on mobile */}
         <div className="hidden md:block fixed bottom-4 right-4 z-10">
           <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-200">
-            <p className="text-lg font-bold" style={{ color: '#0082FB' }}>
+            <p className="text-lg font-bold" style={{ color: '#1921D9' }}>
               Easy Tech
             </p>
             <p className="text-xs text-gray-500 mt-0.5">Powered by</p>

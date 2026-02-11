@@ -32,6 +32,11 @@ const config: Config = {
           DEFAULT: '#F97316', // Orange - Warm accent from palette
           hover: '#EA580C',
         },
+        dashboard: {
+          DEFAULT: '#1921D9',
+          light: '#3D46E6',
+          dark: '#1118A1',
+        },
         background: {
           DEFAULT: '#FFFFFF', // White
           subtle: '#F9FAFB', // Very light gray for sections

@@ -97,7 +97,7 @@ export default function DashboardPage() {
       {isAdmin && (
         <Link
           href="/dashboard/products-metrics"
-          className="block w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white p-4 md:p-6 rounded-xl shadow-lg transition-all transform hover:scale-[1.01] active:scale-[0.99] group overflow-hidden relative"
+          className="block w-full bg-gradient-to-r from-dashboard to-indigo-700 hover:from-dashboard-dark hover:to-indigo-800 text-white p-4 md:p-6 rounded-xl shadow-lg transition-all transform hover:scale-[1.01] active:scale-[0.99] group overflow-hidden relative"
         >
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -106,7 +106,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <h2 className="text-lg md:text-xl font-bold">Products with Category and Total</h2>
-                <p className="text-blue-100 text-sm md:text-base">Overview of inventory distribution and total Birr value</p>
+                <p className="text-dashboard-light/20 text-sm md:text-base">Overview of inventory distribution and total Birr value</p>
               </div>
 
             </div>
@@ -122,7 +122,7 @@ export default function DashboardPage() {
         <>
           {/* Today's Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            <div className="bg-white rounded-lg shadow p-4 md:p-6 border-l-4 border-blue-500">
+            <div className="bg-white rounded-lg shadow p-4 md:p-6 border-l-4 border-dashboard-light/100">
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
                   <p className="text-xs md:text-sm text-gray-600">Total Sales</p>
@@ -131,8 +131,8 @@ export default function DashboardPage() {
                   </p>
                   <p className="text-xs text-gray-500 mt-1">{stats.today.bills} bills today</p>
                 </div>
-                <div className="p-2 md:p-3 bg-blue-100 rounded-lg ml-2 flex-shrink-0">
-                  <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
+                <div className="p-2 md:p-3 bg-dashboard-light/20 rounded-lg ml-2 flex-shrink-0">
+                  <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-dashboard" />
                 </div>
               </div>
             </div>
@@ -255,10 +255,10 @@ export default function DashboardPage() {
                   <div className="p-4 md:p-6 border-b border-gray-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <ShoppingCart className="h-4 w-4 md:h-5 md:w-5 text-blue-600 mr-2" />
+                        <ShoppingCart className="h-4 w-4 md:h-5 md:w-5 text-dashboard mr-2" />
                         <h2 className="text-base md:text-lg font-semibold text-gray-900">Recent Sales</h2>
                       </div>
-                      <Link href="/sales" className="text-xs md:text-sm text-blue-600 hover:underline">
+                      <Link href="/sales" className="text-xs md:text-sm text-dashboard hover:underline">
                         View all →
                       </Link>
                     </div>
@@ -340,10 +340,10 @@ export default function DashboardPage() {
                 <div className="p-4 md:p-6 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <ShoppingCart className="h-4 w-4 md:h-5 md:w-5 text-blue-600 mr-2" />
+                      <ShoppingCart className="h-4 w-4 md:h-5 md:w-5 text-dashboard mr-2" />
                       <h2 className="text-base md:text-lg font-semibold text-gray-900">Today's Sales</h2>
                     </div>
-                    <Link href="/sales" className="text-xs md:text-sm text-blue-600 hover:underline">
+                    <Link href="/sales" className="text-xs md:text-sm text-dashboard hover:underline">
                       View all →
                     </Link>
                   </div>
@@ -386,9 +386,9 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <Link
                       href="/sales/new"
-                      className="p-3 md:p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-center"
+                      className="p-3 md:p-4 bg-dashboard-light/10 rounded-lg hover:bg-dashboard-light/20 transition-colors text-center"
                     >
-                      <ShoppingCart className="h-6 w-6 md:h-8 md:w-8 text-blue-600 mx-auto mb-2" />
+                      <ShoppingCart className="h-6 w-6 md:h-8 md:w-8 text-dashboard mx-auto mb-2" />
                       <p className="text-sm md:text-base font-medium text-gray-900">New Sale</p>
                     </Link>
                     <Link

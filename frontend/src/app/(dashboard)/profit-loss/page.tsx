@@ -478,8 +478,8 @@ export default function ProfitLossPage() {
                     </p>
                   )}
                 </div>
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <DollarSign className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-dashboard-light/20 rounded-lg">
+                  <DollarSign className="h-6 w-6 text-dashboard" />
                 </div>
               </div>
             </div>

@@ -202,8 +202,8 @@ export default function ExpenseReportsPage() {
                     {report.summary.totalCount}
                   </p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <FileText className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-dashboard-light/20 rounded-lg">
+                  <FileText className="h-6 w-6 text-dashboard" />
                 </div>
               </div>
             </div>
@@ -308,7 +308,7 @@ export default function ExpenseReportsPage() {
                           className={`px-2 py-1 rounded text-xs ${
                             expense.paymentMethod === 'CASH'
                               ? 'bg-green-100 text-green-800'
-                              : 'bg-blue-100 text-blue-800'
+                              : 'bg-dashboard-light/20 text-blue-800'
                           }`}
                         >
                           {expense.paymentMethod === 'CASH' ? 'Cash' : 'Bank Transfer'}

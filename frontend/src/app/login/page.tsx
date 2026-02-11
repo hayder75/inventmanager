@@ -31,7 +31,7 @@ export default function LoginPage() {
         router.push('/dashboard');
         return;
       }
-      
+
       // Check if access code was already verified
       const isVerified = localStorage.getItem(ACCESS_CODE_VERIFIED_KEY);
       if (isVerified === 'true') {
@@ -109,7 +109,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
           <div className="mb-6 text-center">
-            <h1 className="text-3xl font-bold mb-2" style={{ color: '#0064E0' }}>
+            <h1 className="text-3xl font-bold mb-2" style={{ color: '#1921D9' }}>
               Real-Bright-Trading
             </h1>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Staff Access</h2>
@@ -146,7 +146,7 @@ export default function LoginPage() {
               type="submit"
               disabled={verifyingCode}
               className="w-full py-3 px-4 rounded-lg text-white font-medium transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: '#0082FB' }}
+              style={{ backgroundColor: '#1921D9' }}
             >
               {verifyingCode ? (
                 <div className="flex items-center justify-center">
@@ -185,7 +185,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold" style={{ color: '#0064E0' }}>
+            <h1 className="text-4xl font-bold" style={{ color: '#1921D9' }}>
               Real-Bright-Trading
             </h1>
           </div>
@@ -263,7 +263,7 @@ export default function LoginPage() {
                 />
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
               </label>
-              <a href="#" className="text-sm font-medium" style={{ color: '#0082FB' }}>
+              <a href="#" className="text-sm font-medium" style={{ color: '#1921D9' }}>
                 Forgot Password?
               </a>
             </div>
@@ -272,7 +272,7 @@ export default function LoginPage() {
               type="submit"
               disabled={isLoading}
               className="w-full py-3 px-4 rounded-lg text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
-              style={{ backgroundColor: '#0082FB' }}
+              style={{ backgroundColor: '#1921D9' }}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
@@ -290,7 +290,7 @@ export default function LoginPage() {
             <div className="text-sm text-gray-500">
               <p>© 2025 Real-Bright-Trading. All rights reserved.</p>
             </div>
-            <div className="text-sm" style={{ color: '#0082FB' }}>
+            <div className="text-sm" style={{ color: '#1921D9' }}>
               <p className="font-medium">Powered by <span className="font-bold">Easy Tech</span></p>
             </div>
           </div>
@@ -298,9 +298,9 @@ export default function LoginPage() {
       </div>
 
       {/* Right Side - Promotional Content */}
-      <div 
+      <div
         className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 relative overflow-hidden"
-        style={{ backgroundColor: '#0064E0' }}
+        style={{ backgroundColor: '#1921D9' }}
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
@@ -320,7 +320,7 @@ export default function LoginPage() {
                 <p className="text-sm text-gray-500">February 20, 2025</p>
               </div>
               <div className="text-right">
-                <p className="text-3xl font-bold" style={{ color: '#0082FB' }}>$56,476.00</p>
+                <p className="text-3xl font-bold" style={{ color: '#1921D9' }}>$56,476.00</p>
                 <p className="text-xs text-gray-500">Total Sales</p>
               </div>
             </div>
@@ -347,7 +347,7 @@ export default function LoginPage() {
         <div className="absolute bottom-12 left-12 right-12 text-white z-10">
           <h3 className="text-4xl font-bold mb-4">Get better with inventory</h3>
           <p className="text-lg opacity-90">
-            Real-Bright-Trading helps you manage stock, track sales, and grow your business efficiently. 
+            Real-Bright-Trading helps you manage stock, track sales, and grow your business efficiently.
             Streamline your operations and make smarter decisions.
           </p>
         </div>

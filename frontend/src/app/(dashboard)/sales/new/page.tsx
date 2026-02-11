@@ -584,7 +584,7 @@ export default function NewSalePage() {
                           </div>
                         </div>
                         {item.adminCutAmount && item.adminCutAmount > 0 && (
-                          <div className="text-xs text-blue-600">
+                          <div className="text-xs text-dashboard">
                             Admin Cut: ${item.adminCutAmount.toFixed(2)} | Remaining Surplus: ${(item.remainingSurplus || 0).toFixed(2)}
                           </div>
                         )}

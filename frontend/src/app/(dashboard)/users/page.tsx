@@ -129,7 +129,7 @@ export default function UsersPage() {
                   <td className="px-6 py-4">{user.email}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded text-xs ${
-                      user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                      user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-dashboard-light/20 text-blue-800'
                     }`}>
                       {user.role}
                     </span>
@@ -225,7 +225,7 @@ export default function UsersPage() {
               </div>
               <div className="flex items-center gap-2">
                 <span className={`px-2 py-1 rounded text-xs ${
-                  user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                  user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-dashboard-light/20 text-blue-800'
                 }`}>
                   {user.role}
                 </span>

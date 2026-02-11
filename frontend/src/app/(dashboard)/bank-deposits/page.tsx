@@ -197,8 +197,8 @@ export default function BankDepositsPage() {
                   {bankSummary[bank].count} transaction{bankSummary[bank].count !== 1 ? 's' : ''}
                 </p>
               </div>
-              <div className="p-2 md:p-3 bg-blue-100 rounded-lg ml-2 flex-shrink-0">
-                <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
+              <div className="p-2 md:p-3 bg-dashboard-light/20 rounded-lg ml-2 flex-shrink-0">
+                <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-dashboard" />
               </div>
             </div>
           </div>
@@ -273,7 +273,7 @@ export default function BankDepositsPage() {
                               href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${deposit.bankTransferImageUrl}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 underline"
+                              className="text-dashboard hover:text-blue-800 underline"
                             >
                               View Image
                             </a>
@@ -332,7 +332,7 @@ export default function BankDepositsPage() {
                             href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${deposit.bankTransferImageUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline text-sm"
+                            className="text-dashboard hover:text-blue-800 underline text-sm"
                           >
                             View Receipt Image
                           </a>

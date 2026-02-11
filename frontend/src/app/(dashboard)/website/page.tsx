@@ -184,7 +184,7 @@ export default function WebsiteManagementPage() {
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 bg-dashboard text-white rounded-lg hover:bg-dashboard-dark"
               >
                 Update
               </button>
@@ -305,7 +305,7 @@ export default function WebsiteManagementPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => startEdit(product)}
-                        className="text-blue-600 hover:text-blue-900"
+                        className="text-dashboard hover:text-blue-900"
                         title="Edit"
                       >
                         <Upload className="w-5 h-5" />

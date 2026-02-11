@@ -215,13 +215,13 @@ export default function CashFlowPage() {
                   {user?.role === 'ADMIN' && (
                     <button
                       onClick={() => setShowOpeningBalanceModal(true)}
-                      className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 min-h-[44px]"
+                      className="px-3 py-1.5 text-xs bg-dashboard text-white rounded hover:bg-dashboard-dark min-h-[44px]"
                     >
                       {openingBalance ? 'Edit' : 'Set'}
                     </button>
                   )}
-                  <div className="p-2 md:p-3 bg-blue-100 rounded-lg">
-                    <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
+                  <div className="p-2 md:p-3 bg-dashboard-light/20 rounded-lg">
+                    <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-dashboard" />
                   </div>
                 </div>
               </div>
@@ -245,12 +245,12 @@ export default function CashFlowPage() {
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
                   <p className="text-xs md:text-sm text-gray-600">Bank Deposits</p>
-                  <p className="text-lg md:text-2xl font-bold text-blue-600 mt-1 truncate">
+                  <p className="text-lg md:text-2xl font-bold text-dashboard mt-1 truncate">
                     {formatCurrency(cashFlow.bankDeposits)}
                   </p>
                 </div>
-                <div className="p-2 md:p-3 bg-blue-100 rounded-lg ml-2 flex-shrink-0">
-                  <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
+                <div className="p-2 md:p-3 bg-dashboard-light/20 rounded-lg ml-2 flex-shrink-0">
+                  <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-dashboard" />
                 </div>
               </div>
             </div>
@@ -290,15 +290,15 @@ export default function CashFlowPage() {
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
                   <p className="text-xs md:text-sm text-gray-600">Total Cash Available</p>
-                  <p className="text-lg md:text-2xl font-bold text-blue-600 mt-1 truncate">
+                  <p className="text-lg md:text-2xl font-bold text-dashboard mt-1 truncate">
                     {formatCurrency(cashFlow.totalAmount || (parseFloat(cashFlow.openingBalance) + parseFloat(cashFlow.cashSales) + parseFloat(cashFlow.bankDeposits) - parseFloat(cashFlow.expenses)).toString())}
                   </p>
                   <p className="text-xs text-gray-500 mt-1 hidden md:block">
                     Opening: {formatCurrency(cashFlow.openingBalance)} + Cash Sales: {formatCurrency(cashFlow.cashSales)} + Bank: {formatCurrency(cashFlow.bankDeposits)} - Expenses: {formatCurrency(cashFlow.expenses)}
                   </p>
                 </div>
-                <div className="p-2 md:p-3 bg-blue-100 rounded-lg ml-2 flex-shrink-0">
-                  <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
+                <div className="p-2 md:p-3 bg-dashboard-light/20 rounded-lg ml-2 flex-shrink-0">
+                  <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-dashboard" />
                 </div>
               </div>
             </div>
@@ -319,7 +319,7 @@ export default function CashFlowPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Bank Deposits:</span>
-                    <span className="font-medium text-blue-600">
+                    <span className="font-medium text-dashboard">
                       {formatCurrency(cashFlow.breakdown.cashIn.bankDeposits)}
                     </span>
                   </div>
@@ -404,7 +404,7 @@ export default function CashFlowPage() {
                           className={`px-2 py-1 rounded text-xs ${
                             expense.paymentMethod === 'CASH'
                               ? 'bg-green-100 text-green-800'
-                              : 'bg-blue-100 text-blue-800'
+                              : 'bg-dashboard-light/20 text-blue-800'
                           }`}
                         >
                           {expense.paymentMethod === 'CASH' ? 'Cash' : 'Bank Transfer'}
@@ -444,7 +444,7 @@ export default function CashFlowPage() {
                           className={`px-2 py-1 rounded ${
                             expense.paymentMethod === 'CASH'
                               ? 'bg-green-100 text-green-800'
-                              : 'bg-blue-100 text-blue-800'
+                              : 'bg-dashboard-light/20 text-blue-800'
                           }`}
                         >
                           {expense.paymentMethod === 'CASH' ? 'Cash' : 'Bank Transfer'}

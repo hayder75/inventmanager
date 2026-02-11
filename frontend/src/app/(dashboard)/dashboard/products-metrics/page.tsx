@@ -204,7 +204,7 @@ export default function ProductsMetricsPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <div className="w-12 h-12 border-4 border-dashboard border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
@@ -216,7 +216,7 @@ export default function ProductsMetricsPage() {
                 <div className="flex items-start">
                     <button
                         onClick={() => router.back()}
-                        className="mr-5 p-3.5 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 transition-all active:scale-95 group"
+                        className="mr-5 p-3.5 bg-dashboard text-white rounded-2xl shadow-lg shadow-blue-200 hover:bg-dashboard-dark hover:shadow-blue-300 transition-all active:scale-95 group"
                         title="Go Back"
                     >
                         <ArrowLeft className="h-7 w-7 transition-transform group-hover:-translate-x-1" />
@@ -259,7 +259,7 @@ export default function ProductsMetricsPage() {
                             <button
                                 onClick={handleAdvancedPrint}
                                 disabled={isPreparingPrint || reportCategories.length === 0}
-                                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 shadow-sm transition-colors"
+                                className="flex items-center px-4 py-2 bg-dashboard text-white rounded-lg hover:bg-dashboard-dark disabled:opacity-50 shadow-sm transition-colors"
                             >
                                 {isPreparingPrint ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" /> : <Printer className="h-5 w-5 mr-2" />}
                                 Print Selected
@@ -324,11 +324,11 @@ export default function ProductsMetricsPage() {
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 ring-1 ring-gray-200/50">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-gray-500 text-sm font-medium uppercase tracking-wider">Expected Profit</span>
-                            <div className="p-2 bg-blue-50 rounded-lg">
-                                <Package className="h-5 w-5 text-blue-600" />
+                            <div className="p-2 bg-dashboard-light/10 rounded-lg">
+                                <Package className="h-5 w-5 text-dashboard" />
                             </div>
                         </div>
-                        <div className="text-2xl font-bold text-blue-600 ">
+                        <div className="text-2xl font-bold text-dashboard ">
                             {formatCurrency(metrics.grandTotalSelling - metrics.grandTotalCost)}
                         </div>
                         <p className="text-xs text-gray-400 mt-1">Profit left after removing costs</p>
@@ -350,7 +350,7 @@ export default function ProductsMetricsPage() {
             {/* Category Grid */}
             <div className="space-y-4">
                 <h2 className="text-lg font-bold text-gray-800 flex items-center">
-                    <LayoutGrid className="h-5 w-5 mr-2 text-blue-600" />
+                    <LayoutGrid className="h-5 w-5 mr-2 text-dashboard" />
                     Browse by Category
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 print:grid-cols-2">
@@ -359,17 +359,17 @@ export default function ProductsMetricsPage() {
                             key={cat.name}
                             onClick={() => fetchCategoryProducts(cat.name)}
                             className={`text-left p-5 rounded-xl border transition-all duration-200 group relative overflow-hidden ${selectedCategory === cat.name
-                                ? 'bg-blue-600 border-blue-600 text-white shadow-lg ring-2 ring-blue-300'
-                                : 'bg-white border-gray-200 hover:border-blue-400 hover:shadow-md'
+                                ? 'bg-dashboard border-dashboard text-white shadow-lg ring-2 ring-blue-300'
+                                : 'bg-white border-gray-200 hover:border-dashboard-light hover:shadow-md'
                                 }`}
                         >
                             <div className="relative z-10 flex flex-col h-full justify-between">
                                 <div>
-                                    <div className={`text-xs font-bold uppercase tracking-widest mb-1 ${selectedCategory === cat.name ? 'text-blue-100' : 'text-blue-600'}`}>
+                                    <div className={`text-xs font-bold uppercase tracking-widest mb-1 ${selectedCategory === cat.name ? 'text-dashboard-light/20' : 'text-dashboard'}`}>
                                         {cat.name}
                                     </div>
                                     <div className="text-lg font-black">{cat.count} Products</div>
-                                    <div className={`text-sm mt-1 mb-4 ${selectedCategory === cat.name ? 'text-blue-100' : 'text-gray-500'}`}>
+                                    <div className={`text-sm mt-1 mb-4 ${selectedCategory === cat.name ? 'text-dashboard-light/20' : 'text-gray-500'}`}>
                                         {cat.stockLevel} units in stock
                                     </div>
                                 </div>
@@ -450,19 +450,19 @@ export default function ProductsMetricsPage() {
                                                 <td className="px-6 py-4 text-right text-gray-600">
                                                     {formatCurrency(parseFloat(p.costPrice) * p.stockQty)}
                                                 </td>
-                                                <td className="px-6 py-4 text-right font-bold text-blue-600">
+                                                <td className="px-6 py-4 text-right font-bold text-dashboard">
                                                     {formatCurrency(parseFloat(p.sellingPrice) * p.stockQty)}
                                                 </td>
                                             </tr>
                                         ))}
                                     </tbody>
-                                    <tfoot className="bg-blue-50/50 font-bold border-t-2 border-blue-100 text-blue-900">
+                                    <tfoot className="bg-dashboard-light/10/50 font-bold border-t-2 border-dashboard-light/20 text-blue-900">
                                         <tr>
                                             <td colSpan={5} className="px-6 py-4 text-right uppercase tracking-wider">Subtotal for {selectedCategory}</td>
-                                            <td className="px-6 py-4 text-right bg-blue-100/50">
+                                            <td className="px-6 py-4 text-right bg-dashboard-light/20/50">
                                                 {formatCurrency(categoryProducts.reduce((acc, p) => acc + (parseFloat(p.costPrice) * p.stockQty), 0))}
                                             </td>
-                                            <td className="px-6 py-4 text-right bg-blue-100/50">
+                                            <td className="px-6 py-4 text-right bg-dashboard-light/20/50">
                                                 {formatCurrency(categoryProducts.reduce((acc, p) => acc + (parseFloat(p.sellingPrice) * p.stockQty), 0))}
                                             </td>
                                         </tr>
@@ -499,7 +499,7 @@ export default function ProductsMetricsPage() {
                     </div>
                     <div className="p-3 border rounded-lg bg-gray-50 text-center">
                         <p className="text-[10px] uppercase font-bold text-gray-400">Expected Profit</p>
-                        <p className="text-lg font-black text-blue-600">
+                        <p className="text-lg font-black text-dashboard">
                             {formatCurrency((metrics?.categories.filter(c => reportCategories.includes(c.name)).reduce((sum, c) => sum + c.totalSelling, 0) || 0) - (metrics?.categories.filter(c => reportCategories.includes(c.name)).reduce((sum, c) => sum + c.totalCost, 0) || 0))}
                         </p>
                     </div>
@@ -560,7 +560,7 @@ export default function ProductsMetricsPage() {
                                         <td className="py-2 text-right font-black border-t-2 border-gray-200 text-gray-400">
                                             -
                                         </td>
-                                        <td className="py-2 text-right font-black border-t-2 border-gray-200 text-blue-600">
+                                        <td className="py-2 text-right font-black border-t-2 border-gray-200 text-dashboard">
                                             {formatCurrency(productsInCat.reduce((sum, p) => sum + (parseFloat(p.sellingPrice) * p.stockQty), 0))}
                                         </td>
                                     </tr>
