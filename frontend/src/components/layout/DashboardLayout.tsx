@@ -139,7 +139,7 @@ const salesMenuCategories: MenuCategory[] = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [openCategories, setOpenCategories] = useState<string[]>(['Dashboard', 'Inventory']);
+  const [openCategory, setOpenCategory] = useState<string | null>('Inventory');
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -152,11 +152,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const toggleCategory = (title: string) => {
-    setOpenCategories(prev =>
-      prev.includes(title)
-        ? prev.filter(t => t !== title)
-        : [...prev, title]
-    );
+    setOpenCategory(prev => prev === title ? null : title);
   };
 
   const isActive = (href: string) => {
@@ -201,14 +197,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="px-3 space-y-1">
               {categories.map((category) => {
                 const Icon = category.icon;
-                const isOpen = openCategories.includes(category.title);
+                const isOpen = openCategory === category.title;
                 const categoryActive = isCategoryActive(category);
 
                 return (
                   <div key={category.title} className="space-y-1">
                     <button
                       onClick={() => toggleCategory(category.title)}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold rounded-xl transition-all ${categoryActive
+                      className={`w-full flex items-center justify-between px-3 py-2.5 text-[15px] font-semibold rounded-xl transition-all ${categoryActive
                         ? 'bg-white/10 text-white'
                         : 'text-blue-100 hover:bg-white/5 hover:text-white'
                         }`}
@@ -235,7 +231,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               key={item.href}
                               href={item.href}
                               onClick={() => setSidebarOpen(false)}
-                              className={`flex items-center px-4 py-2 text-xs font-medium rounded-lg transition-all ${active
+                              className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all ${active
                                 ? 'bg-blue-400 text-white shadow-sm'
                                 : 'text-blue-100 hover:bg-white/10 hover:text-white'
                                 }`}
