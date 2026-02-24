@@ -277,10 +277,10 @@ model Expense {
   expenseDate   DateTime   @map("expense_date") 
   description   String     
   amount        Decimal    
-  paymentMethod String     // CASH, BANK_TRANSFER, OTHER, SALES
-  bankType      String?    // CBE, ABYSSINYA, AWASH, TELEBIRR, OTHER:name
-  bankTransferImageUrl String? // Receipt image
-  customPaymentNote String? // Free text for OTHER/SALES payment types
+  paymentMethod String     
+  bankType      String?    
+  bankTransferImageUrl String? 
+  customPaymentNote String? 
   createdBy     String     @map("created_by")
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
