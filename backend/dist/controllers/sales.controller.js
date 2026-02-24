@@ -8,7 +8,7 @@ const prisma_1 = require("../utils/prisma");
 const library_1 = require("@prisma/client/runtime/library");
 async function createSale(req, res) {
     try {
-        const { companyId, walkinName, walkinPhone, items, paymentMethods } = req.body;
+        const { companyId, walkinName, walkinPhone, items, paymentMethods, bankTransferImageUrl } = req.body;
         if (!items || items.length === 0) {
             return res.status(400).json({ error: 'Sale must have at least one item' });
         }
@@ -28,9 +28,23 @@ async function createSale(req, res) {
             if (!product) {
                 return res.status(404).json({ error: `Product ${item.productId} not found` });
             }
-            if (product.stockQty < item.quantity) {
+            // Determine sale unit (default to pieces if not specified)
+            const saleUnit = item.saleUnit || 'pieces';
+            const piecesPerUnit = product.piecesPerUnit || 1;
+            // Convert sale quantity to stock units
+            let quantityInStockUnits;
+            if (saleUnit === 'pack' && product.unit && product.unit.toLowerCase() !== 'pcs') {
+                // Selling in packs, stock is in packs - direct match
+                quantityInStockUnits = item.quantity;
+            }
+            else {
+                // Selling in pieces, convert to stock units
+                quantityInStockUnits = Math.ceil(item.quantity / piecesPerUnit);
+            }
+            if (product.stockQty < quantityInStockUnits) {
+                const availablePieces = product.stockQty * piecesPerUnit;
                 return res.status(400).json({
-                    error: `Insufficient stock for ${product.name}. Available: ${product.stockQty}, Requested: ${item.quantity}`
+                    error: `Insufficient stock for ${product.name}. Available: ${product.stockQty} ${product.unit || 'units'} (${availablePieces} pieces), Requested: ${item.quantity} ${saleUnit}`
                 });
             }
             // Validate price override (can only increase)
@@ -181,11 +195,13 @@ async function createSale(req, res) {
                     totalCredit,
                     commissionAmount,
                     bankType: bankType || null,
+                    bankTransferImageUrl: bankTransferImageUrl || null,
                     salespersonId: req.user.id,
                     items: {
                         create: items.map(item => ({
                             productId: item.productId,
                             quantity: item.quantity,
+                            saleUnit: item.saleUnit || 'pieces',
                             adminPrice: item.adminPrice,
                             overriddenPrice: item.overriddenPrice || null,
                             finalPrice: item.finalPrice,
@@ -213,11 +229,24 @@ async function createSale(req, res) {
             });
             // Update stock for each item
             for (const item of items) {
+                const product = await tx.product.findUnique({ where: { id: item.productId } });
+                if (!product)
+                    continue;
+                // Convert sale quantity to stock units
+                const saleUnit = item.saleUnit || 'pieces';
+                const piecesPerUnit = product.piecesPerUnit || 1;
+                let quantityInStockUnits;
+                if (saleUnit === 'pack' && product.unit && product.unit.toLowerCase() !== 'pcs') {
+                    quantityInStockUnits = item.quantity; // Direct pack-to-pack
+                }
+                else {
+                    quantityInStockUnits = Math.ceil(item.quantity / piecesPerUnit); // Pieces to packs
+                }
                 await tx.product.update({
                     where: { id: item.productId },
                     data: {
                         stockQty: {
-                            decrement: item.quantity,
+                            decrement: quantityInStockUnits,
                         },
                     },
                 });
@@ -380,6 +409,7 @@ async function getBankDeposits(req, res) {
                 id: true,
                 invoiceNumber: true,
                 bankType: true,
+                bankTransferImageUrl: true,
                 totalPaid: true,
                 createdAt: true,
                 salesperson: {
@@ -403,6 +433,7 @@ async function getBankDeposits(req, res) {
             id: sale.id,
             invoiceNumber: sale.invoiceNumber,
             bankType: sale.bankType,
+            bankTransferImageUrl: sale.bankTransferImageUrl,
             amount: sale.totalPaid.toString(),
             createdAt: sale.createdAt.toISOString(),
             salesperson: sale.salesperson,

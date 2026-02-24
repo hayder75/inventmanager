@@ -28,9 +28,18 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        // Only redirect to login if it's a verify or auth-related 401
+        // Don't redirect for admin actions like password reset, user updates, etc.
+        const requestUrl = error.config?.url || '';
+        const isAuthCheck = requestUrl.includes('/auth/verify') || requestUrl.includes('/auth/login');
+
+        if (isAuthCheck) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
+        // For other 401s (like expired token on data fetch), just reject the promise
+        // The AuthContext will handle session management
       }
     }
     return Promise.reject(error);

@@ -58,6 +58,7 @@ async function getPublicProducts(req, res) {
                 sellingPrice: true,
                 category: true,
                 stockQty: true,
+                unit: true,
             },
         });
         // Transform to match frontend expectations
@@ -69,6 +70,7 @@ async function getPublicProducts(req, res) {
             price: product.sellingPrice,
             category: product.category,
             stockQty: product.stockQty,
+            unit: product.unit,
         }));
         res.json(transformedProducts);
     }
@@ -93,6 +95,7 @@ async function getNewProducts(req, res) {
                 sellingPrice: true,
                 category: true,
                 stockQty: true,
+                unit: true,
                 createdAt: true,
             },
         });
@@ -103,6 +106,7 @@ async function getNewProducts(req, res) {
             description: product.description,
             imageUrl: product.imageUrl,
             price: product.sellingPrice,
+            unit: product.unit,
             category: product.category,
             stockQty: product.stockQty,
             createdAt: product.createdAt,
@@ -130,6 +134,7 @@ async function getAllPublicProducts(req, res) {
                 sellingPrice: true,
                 category: true,
                 stockQty: true,
+                unit: true,
                 showOnWebsite: true,
                 isNew: true,
                 notes: true,

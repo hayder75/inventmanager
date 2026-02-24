@@ -88,6 +88,9 @@ async function recordSupplierPayment(req, res) {
                 method,
                 supplierName: supplierName || entries[0].supplierName,
                 notes: notes || null,
+                stockEntries: {
+                    connect: stockEntryIds.map((id) => ({ id })),
+                },
             },
         });
         res.status(201).json(payment);

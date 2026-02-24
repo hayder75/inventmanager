@@ -1,4 +1,4 @@
-// File: /home/hayder/Downloads/Telegram Desktop/inventmanager-updated/frontend/src/app/(dashboard)/products/[id]/page.tsx
+// File: /home/hayder/inventmanager/frontend/src/app/(dashboard)/products/[id]/page.tsx
 import * as entry from '../../../../../../src/app/(dashboard)/products/[id]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -10,15 +10,15 @@ const prisma_1 = require("../utils/prisma");
 const library_1 = require("@prisma/client/runtime/library");
 async function createExpense(req, res) {
     try {
-        const { expenseType, expenseDate, description, amount, paymentMethod } = req.body;
+        const { expenseType, expenseDate, description, amount, paymentMethod, bankType, bankTransferImageUrl, customPaymentNote } = req.body;
         if (!expenseType || !expenseDate || !description || !amount || !paymentMethod) {
             return res.status(400).json({
                 error: 'Expense type, date, description, amount, and payment method are required',
             });
         }
-        if (!['CASH', 'BANK_TRANSFER'].includes(paymentMethod)) {
+        if (!['CASH', 'BANK_TRANSFER', 'OTHER', 'SALES'].includes(paymentMethod)) {
             return res.status(400).json({
-                error: 'Payment method must be CASH or BANK_TRANSFER',
+                error: 'Payment method must be CASH, BANK_TRANSFER, OTHER, or SALES',
             });
         }
         if (!req.user) {
@@ -31,6 +31,9 @@ async function createExpense(req, res) {
                 description,
                 amount: new library_1.Decimal(amount),
                 paymentMethod,
+                bankType: paymentMethod === 'BANK_TRANSFER' ? (bankType || null) : null,
+                bankTransferImageUrl: paymentMethod === 'BANK_TRANSFER' ? (bankTransferImageUrl || null) : null,
+                customPaymentNote: ['OTHER', 'SALES'].includes(paymentMethod) ? (customPaymentNote || null) : null,
                 createdBy: req.user.id,
             },
             include: {
@@ -210,7 +213,7 @@ async function getExpenseById(req, res) {
 async function updateExpense(req, res) {
     try {
         const { id } = req.params;
-        const { expenseType, expenseDate, description, amount, paymentMethod } = req.body;
+        const { expenseType, expenseDate, description, amount, paymentMethod, bankType, bankTransferImageUrl, customPaymentNote } = req.body;
         const expense = await prisma_1.prisma.expense.findUnique({
             where: { id },
         });
@@ -227,12 +230,28 @@ async function updateExpense(req, res) {
         if (amount)
             updateData.amount = new library_1.Decimal(amount);
         if (paymentMethod) {
-            if (!['CASH', 'BANK_TRANSFER'].includes(paymentMethod)) {
+            if (!['CASH', 'BANK_TRANSFER', 'OTHER', 'SALES'].includes(paymentMethod)) {
                 return res.status(400).json({
-                    error: 'Payment method must be CASH or BANK_TRANSFER',
+                    error: 'Payment method must be CASH, BANK_TRANSFER, OTHER, or SALES',
                 });
             }
             updateData.paymentMethod = paymentMethod;
+            // Update related fields based on payment method
+            if (paymentMethod === 'BANK_TRANSFER') {
+                updateData.bankType = bankType || null;
+                updateData.bankTransferImageUrl = bankTransferImageUrl || null;
+                updateData.customPaymentNote = null;
+            }
+            else if (['OTHER', 'SALES'].includes(paymentMethod)) {
+                updateData.bankType = null;
+                updateData.bankTransferImageUrl = null;
+                updateData.customPaymentNote = customPaymentNote || null;
+            }
+            else {
+                updateData.bankType = null;
+                updateData.bankTransferImageUrl = null;
+                updateData.customPaymentNote = null;
+            }
         }
         const updated = await prisma_1.prisma.expense.update({
             where: { id },

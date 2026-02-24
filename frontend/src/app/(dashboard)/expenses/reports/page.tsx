@@ -26,6 +26,9 @@ interface ExpenseReport {
     description: string;
     amount: string;
     paymentMethod: string;
+    bankType: string | null;
+    bankTransferImageUrl: string | null;
+    customPaymentNote: string | null;
     creator: { name: string };
   }>;
 }
@@ -305,14 +308,34 @@ export default function ExpenseReportsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <span
-                          className={`px-2 py-1 rounded text-xs ${
-                            expense.paymentMethod === 'CASH'
+                          className={`px-2 py-1 rounded text-xs ${expense.paymentMethod === 'CASH'
                               ? 'bg-green-100 text-green-800'
-                              : 'bg-dashboard-light/20 text-blue-800'
-                          }`}
+                              : expense.paymentMethod === 'BANK_TRANSFER'
+                                ? 'bg-blue-100 text-blue-800'
+                                : expense.paymentMethod === 'SALES'
+                                  ? 'bg-purple-100 text-purple-800'
+                                  : 'bg-gray-100 text-gray-800'
+                            }`}
                         >
-                          {expense.paymentMethod === 'CASH' ? 'Cash' : 'Bank Transfer'}
+                          {expense.paymentMethod === 'CASH' ? 'Cash'
+                            : expense.paymentMethod === 'BANK_TRANSFER'
+                              ? `Bank${expense.bankType ? ` - ${expense.bankType.startsWith('OTHER:') ? expense.bankType.replace('OTHER:', '') : expense.bankType}` : ''}`
+                              : expense.paymentMethod === 'OTHER'
+                                ? `Other${expense.customPaymentNote ? `: ${expense.customPaymentNote}` : ''}`
+                                : expense.paymentMethod === 'SALES'
+                                  ? `Sales${expense.customPaymentNote ? `: ${expense.customPaymentNote}` : ''}`
+                                  : expense.paymentMethod}
                         </span>
+                        {expense.bankTransferImageUrl && (
+                          <a
+                            href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${expense.bankTransferImageUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-2 text-blue-600 hover:text-blue-800 underline text-xs"
+                          >
+                            Receipt
+                          </a>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {expense.creator.name}

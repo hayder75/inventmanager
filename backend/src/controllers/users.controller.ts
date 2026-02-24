@@ -178,13 +178,25 @@ export async function deleteUser(req: AuthRequest, res: Response) {
       return res.status(400).json({ error: 'Cannot delete your own account' });
     }
 
-    // Soft delete by deactivating
-    await prisma.user.update({
+    // Check if user has any sales, expenses, etc.
+    const salesCount = await prisma.sale.count({ where: { salespersonId: id } });
+    const expensesCount = await prisma.expense.count({ where: { createdBy: id } });
+
+    if (salesCount > 0 || expensesCount > 0) {
+      // If the user has related records, deactivate instead of deleting
+      await prisma.user.update({
+        where: { id },
+        data: { isActive: false },
+      });
+      return res.json({ message: 'User has existing records and was deactivated instead of deleted.' });
+    }
+
+    // If no related records, hard delete
+    await prisma.user.delete({
       where: { id },
-      data: { isActive: false },
     });
 
-    res.json({ message: 'User deactivated successfully' });
+    res.json({ message: 'User deleted successfully' });
   } catch (error: any) {
     console.error('Delete user error:', error);
     if (error.code === 'P2025') {
@@ -217,5 +229,3 @@ export async function resetUserCommission(req: AuthRequest, res: Response) {
     res.status(500).json({ error: 'Internal server error' });
   }
 }
-
-

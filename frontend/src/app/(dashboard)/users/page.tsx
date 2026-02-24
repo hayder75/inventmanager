@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import { Plus, Edit, Trash2, Key } from 'lucide-react';
+import { Plus, Edit, Trash2, Key, UserCheck, UserX } from 'lucide-react';
 
 interface User {
   id: string;
@@ -79,13 +79,24 @@ export default function UsersPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to deactivate this user?')) return;
+  const handleToggleActive = async (user: User) => {
+    const action = user.isActive ? 'deactivate' : 'activate';
+    if (!confirm(`Are you sure you want to ${action} ${user.name}?`)) return;
+    try {
+      await api.put(`/api/users/${user.id}`, { isActive: !user.isActive });
+      fetchUsers();
+    } catch (error: any) {
+      alert(error.response?.data?.error || `Failed to ${action} user`);
+    }
+  };
+
+  const handleDelete = async (id: string, userName: string) => {
+    if (!confirm(`Are you sure you want to permanently delete ${userName}? This action cannot be undone.`)) return;
     try {
       await api.delete(`/api/users/${id}`);
       fetchUsers();
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to deactivate user');
+      alert(error.response?.data?.error || 'Failed to delete user');
     }
   };
 
@@ -124,25 +135,23 @@ export default function UsersPage() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
+                <tr key={user.id} className={`hover:bg-gray-50 ${!user.isActive ? 'opacity-60' : ''}`}>
                   <td className="px-6 py-4 font-medium">{user.name}</td>
                   <td className="px-6 py-4">{user.email}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-dashboard-light/20 text-blue-800'
-                    }`}>
+                    <span className={`px-2 py-1 rounded text-xs ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-dashboard-light/20 text-blue-800'
+                      }`}>
                       {user.role}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-2 py-1 rounded text-xs ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
                       {user.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-1">
                       <button
                         onClick={() => {
                           setEditingUser(user);
@@ -155,6 +164,7 @@ export default function UsersPage() {
                           setShowModal(true);
                         }}
                         className="text-primary-600 hover:text-primary-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        title="Edit User"
                       >
                         <Edit className="h-5 w-5" />
                       </button>
@@ -164,12 +174,24 @@ export default function UsersPage() {
                           setShowPasswordModal(true);
                         }}
                         className="text-yellow-600 hover:text-yellow-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        title="Reset Password"
                       >
                         <Key className="h-5 w-5" />
                       </button>
                       <button
-                        onClick={() => handleDelete(user.id)}
+                        onClick={() => handleToggleActive(user)}
+                        className={`min-h-[44px] min-w-[44px] flex items-center justify-center ${user.isActive
+                            ? 'text-orange-600 hover:text-orange-800'
+                            : 'text-green-600 hover:text-green-800'
+                          }`}
+                        title={user.isActive ? 'Deactivate User' : 'Activate User'}
+                      >
+                        {user.isActive ? <UserX className="h-5 w-5" /> : <UserCheck className="h-5 w-5" />}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user.id, user.name)}
                         className="text-red-600 hover:text-red-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        title="Delete User"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -184,13 +206,13 @@ export default function UsersPage() {
         {/* Mobile Card View */}
         <div className="lg:hidden p-4 space-y-3">
           {users.map((user) => (
-            <div key={user.id} className="border border-gray-200 rounded-lg p-4 space-y-2">
+            <div key={user.id} className={`border border-gray-200 rounded-lg p-4 space-y-2 ${!user.isActive ? 'opacity-60' : ''}`}>
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
                   <h3 className="text-base font-bold text-gray-900">{user.name}</h3>
                   <p className="text-sm text-gray-600 truncate">{user.email}</p>
                 </div>
-                <div className="flex space-x-2 ml-2 flex-shrink-0">
+                <div className="flex space-x-1 ml-2 flex-shrink-0">
                   <button
                     onClick={() => {
                       setEditingUser(user);
@@ -216,7 +238,17 @@ export default function UsersPage() {
                     <Key className="h-5 w-5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(user.id)}
+                    onClick={() => handleToggleActive(user)}
+                    className={`min-h-[44px] min-w-[44px] flex items-center justify-center ${user.isActive
+                        ? 'text-orange-600 hover:text-orange-800'
+                        : 'text-green-600 hover:text-green-800'
+                      }`}
+                    title={user.isActive ? 'Deactivate' : 'Activate'}
+                  >
+                    {user.isActive ? <UserX className="h-5 w-5" /> : <UserCheck className="h-5 w-5" />}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(user.id, user.name)}
                     className="text-red-600 hover:text-red-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
                   >
                     <Trash2 className="h-5 w-5" />
@@ -224,14 +256,12 @@ export default function UsersPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 rounded text-xs ${
-                  user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-dashboard-light/20 text-blue-800'
-                }`}>
+                <span className={`px-2 py-1 rounded text-xs ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-dashboard-light/20 text-blue-800'
+                  }`}>
                   {user.role}
                 </span>
-                <span className={`px-2 py-1 rounded text-xs ${
-                  user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <span className={`px-2 py-1 rounded text-xs ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
                   {user.isActive ? 'Active' : 'Inactive'}
                 </span>
               </div>
@@ -365,4 +395,3 @@ export default function UsersPage() {
     </div>
   );
 }
-

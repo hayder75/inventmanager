@@ -27,11 +27,25 @@ async function addStock(req, res) {
                     const calculatedSellingPrice = (entry.sellingPrice && entry.sellingPrice > 0)
                         ? entry.sellingPrice
                         : (entry.costPrice > 0 ? entry.costPrice * 1.5 : 0);
+                    // Determine piecesPerUnit based on the unit
+                    let piecesPerUnit = 1;
+                    const unit = entry.unit || 'pcs';
+                    if (unit.toLowerCase() === 'pak' || unit.toLowerCase() === 'pack') {
+                        piecesPerUnit = 10; // Default: 1 pack = 10 pieces
+                    }
+                    else if (unit.toLowerCase() === 'reem') {
+                        piecesPerUnit = 500; // 1 reem = 500 pieces
+                    }
+                    else if (unit.toLowerCase() === 'set') {
+                        piecesPerUnit = 1;
+                    }
                     const newProduct = await tx.product.create({
                         data: {
                             name: entry.productName,
                             code: entry.productCode || null,
                             category: entry.category || null,
+                            unit: unit,
+                            piecesPerUnit: piecesPerUnit,
                             costPrice: new library_1.Decimal(entry.costPrice),
                             sellingPrice: new library_1.Decimal(calculatedSellingPrice),
                             stockQty: entry.quantity,
@@ -40,10 +54,32 @@ async function addStock(req, res) {
                     productId = newProduct.id;
                 }
                 else {
+                    // Get existing product to check current unit
+                    const existingProduct = await tx.product.findUnique({ where: { id: productId } });
+                    if (!existingProduct) {
+                        throw new Error(`Product ${productId} not found`);
+                    }
+                    // Calculate quantity increment based on unit
+                    let quantityToAdd = entry.quantity;
+                    const entryUnit = entry.unit || existingProduct.unit || 'pcs';
+                    // If adding in pieces but product is in packs, convert
+                    if (entryUnit.toLowerCase() === 'pcs' && existingProduct.unit && existingProduct.unit.toLowerCase() === 'pak') {
+                        const piecesPerUnit = existingProduct.piecesPerUnit || 10;
+                        quantityToAdd = Math.ceil(entry.quantity / piecesPerUnit); // Convert pieces to packs
+                    }
+                    // If adding in packs but product is in pieces, convert
+                    else if (entryUnit.toLowerCase() === 'pak' && existingProduct.unit && existingProduct.unit.toLowerCase() === 'pcs') {
+                        const piecesPerUnit = 10; // Default conversion
+                        quantityToAdd = entry.quantity * piecesPerUnit; // Convert packs to pieces
+                    }
+                    // If units match or product has no unit, use as-is
+                    else if (entryUnit.toLowerCase() === existingProduct.unit?.toLowerCase() || !existingProduct.unit) {
+                        quantityToAdd = entry.quantity;
+                    }
                     // Update existing product stock
                     const updateData = {
                         stockQty: {
-                            increment: entry.quantity,
+                            increment: quantityToAdd,
                         },
                     };
                     // Always update prices when adding stock
@@ -52,6 +88,20 @@ async function addStock(req, res) {
                     }
                     if (entry.sellingPrice && entry.sellingPrice > 0) {
                         updateData.sellingPrice = new library_1.Decimal(entry.sellingPrice);
+                    }
+                    // Update unit if provided and different
+                    if (entry.unit && entry.unit !== existingProduct.unit) {
+                        updateData.unit = entry.unit;
+                        // Update piecesPerUnit based on new unit
+                        if (entry.unit.toLowerCase() === 'pak' || entry.unit.toLowerCase() === 'pack') {
+                            updateData.piecesPerUnit = 10;
+                        }
+                        else if (entry.unit.toLowerCase() === 'reem') {
+                            updateData.piecesPerUnit = 500;
+                        }
+                        else {
+                            updateData.piecesPerUnit = 1;
+                        }
                     }
                     await tx.product.update({
                         where: { id: productId },
