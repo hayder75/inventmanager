@@ -6,21 +6,42 @@ const prisma_1 = require("../utils/prisma");
 const library_1 = require("@prisma/client/runtime/library");
 async function getDashboardStats(req, res) {
     try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        // Determine 'Today' in East Africa Time (UTC+3)
+        const now = new Date();
+        const eatOffset = 3 * 60 * 60 * 1000; // +3 hours
+        const eatTime = new Date(now.getTime() + eatOffset);
+        const todayStr = eatTime.toISOString().split('T')[0];
+        // For created_at (which holds exact UTC timestamps mapped to real-time events)
+        // We want the start and end of the EAT day, translated back to UTC.
+        const todayTargetStart = new Date(todayStr + 'T00:00:00.000Z');
+        const startOfDayUTC = new Date(todayTargetStart.getTime() - eatOffset);
+        const endOfDayUTC = new Date(startOfDayUTC.getTime() + 24 * 60 * 60 * 1000);
+        // For expenseDate (which is intentionally stored without time as YYYY-MM-DD T00:00:00.000Z)
+        const expenseTargetStart = new Date(todayStr + 'T00:00:00.000Z');
+        const expenseTargetEnd = new Date(expenseTargetStart.getTime() + 24 * 60 * 60 * 1000);
+        // Check if user is SALES - only show their data
+        const isSalesPerson = req.user?.role === 'SALES';
+        const salespersonFilter = isSalesPerson ? { salespersonId: req.user.id } : {};
         // Today's sales
         const todaySales = await prisma_1.prisma.sale.findMany({
             where: {
                 createdAt: {
-                    gte: today,
-                    lt: tomorrow,
+                    gte: startOfDayUTC,
+                    lt: endOfDayUTC,
                 },
+                ...salespersonFilter,
             },
         });
-        const totalSales = todaySales.reduce((sum, sale) => sum.plus(sale.totalAmount), new library_1.Decimal(0));
-        const cashCollected = todaySales.reduce((sum, sale) => sum.plus(sale.totalPaid), new library_1.Decimal(0));
+        // Total Sales = actual money received (including overprice)
+        const totalSales = todaySales.reduce((sum, sale) => sum.plus(sale.totalPaid), new library_1.Decimal(0));
+        // Cash Collected = actual cash received (where bankType is NULL)
+        const cashCollected = todaySales
+            .filter(sale => !sale.bankType) // No bank type = cash payment
+            .reduce((sum, sale) => sum.plus(sale.totalPaid), new library_1.Decimal(0));
+        // Bank Collected = actual bank transfers (where bankType is NOT NULL)
+        const bankCollected = todaySales
+            .filter(sale => sale.bankType) // Has bank type = bank transfer
+            .reduce((sum, sale) => sum.plus(sale.totalPaid), new library_1.Decimal(0));
         const creditSales = todaySales.reduce((sum, sale) => sum.plus(sale.totalCredit), new library_1.Decimal(0));
         // Calculate profit (using admin prices)
         let profit = new library_1.Decimal(0);
@@ -38,34 +59,49 @@ async function getDashboardStats(req, res) {
         // Low stock alerts
         const products = await prisma_1.prisma.product.findMany();
         const lowStockProducts = products.filter(p => p.stockQty <= p.lowStockAlert);
-        // Bank collected (from payments)
-        const todayPayments = await prisma_1.prisma.paymentReceived.findMany({
-            where: {
-                createdAt: {
-                    gte: today,
-                    lt: tomorrow,
-                },
-                method: 'BANK_TRANSFER',
-            },
-        });
-        const bankCollected = todayPayments.reduce((sum, payment) => sum.plus(payment.amount), new library_1.Decimal(0));
         // Today's expenses
-        const todayExpenses = await prisma_1.prisma.expense.findMany({
-            where: {
-                expenseDate: {
-                    gte: today,
-                    lt: tomorrow,
-                },
+        const expenseWhere = {
+            expenseDate: {
+                gte: expenseTargetStart,
+                lt: expenseTargetEnd,
             },
+        };
+        // For sales users, show only expenses linked to them (by salespersonId or createdBy)
+        if (isSalesPerson) {
+            expenseWhere.OR = [
+                { salespersonId: req.user.id },
+                { createdBy: req.user.id, salespersonId: null },
+            ];
+            delete expenseWhere.expenseDate; // Need to restructure for Prisma AND+OR
+            expenseWhere.AND = [
+                {
+                    expenseDate: {
+                        gte: expenseTargetStart,
+                        lt: expenseTargetEnd,
+                    },
+                },
+            ];
+        }
+        const todayExpenses = await prisma_1.prisma.expense.findMany({
+            where: expenseWhere,
         });
         const totalExpenses = todayExpenses.reduce((sum, expense) => sum.plus(expense.amount), new library_1.Decimal(0));
+        // Net amount = cash + bank + payments received - expenses
+        const netAmount = cashCollected.plus(bankCollected).minus(totalExpenses);
         // Total products count
         const totalProducts = await prisma_1.prisma.product.count();
         // Total sales count today
         const totalBills = todaySales.length;
-        // Recent sales (last 5)
+        // Recent sales (last 10, today only) with item details
         const recentSales = await prisma_1.prisma.sale.findMany({
-            take: 5,
+            take: 10,
+            where: {
+                createdAt: {
+                    gte: startOfDayUTC,
+                    lt: endOfDayUTC,
+                },
+                ...salespersonFilter,
+            },
             orderBy: {
                 createdAt: 'desc',
             },
@@ -75,12 +111,20 @@ async function getDashboardStats(req, res) {
                         name: true,
                     },
                 },
+                items: {
+                    include: {
+                        product: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
             },
         });
         // Total customers/contacts
         const totalContacts = await prisma_1.prisma.contact.count();
         // Pending credit (total credit not yet paid)
-        // Get all sales with credit and calculate remaining credit
         const allSalesWithCredit = await prisma_1.prisma.sale.findMany({
             where: {
                 totalCredit: {
@@ -89,7 +133,6 @@ async function getDashboardStats(req, res) {
             },
         });
         const totalPendingCredit = allSalesWithCredit.reduce((sum, sale) => {
-            // Remaining credit = total credit - total paid
             const remainingCredit = sale.totalCredit.minus(sale.totalPaid);
             return remainingCredit.gt(0) ? sum.plus(remainingCredit) : sum;
         }, new library_1.Decimal(0));
@@ -101,6 +144,7 @@ async function getDashboardStats(req, res) {
                 creditSales: creditSales.toString(),
                 profit: profit.toString(),
                 expenses: totalExpenses.toString(),
+                netAmount: netAmount.toString(),
                 bills: totalBills,
             },
             overview: {
@@ -118,8 +162,20 @@ async function getDashboardStats(req, res) {
             recentSales: recentSales.map(sale => ({
                 id: sale.id,
                 totalAmount: sale.totalAmount.toString(),
+                totalPaid: sale.totalPaid.toString(),
+                bankType: sale.bankType,
                 createdAt: sale.createdAt.toISOString(),
                 salespersonName: sale.salesperson.name,
+                items: sale.items.map(item => ({
+                    productName: item.product.name,
+                    quantity: item.quantity,
+                    saleUnit: item.saleUnit || 'pieces',
+                    adminPrice: item.adminPrice.toString(),
+                    finalPrice: item.finalPrice.toString(),
+                    overriddenPrice: item.overriddenPrice?.toString() || null,
+                    subtotal: item.subtotal.toString(),
+                    surplusAmount: item.surplusAmount?.toString() || '0',
+                })),
             })),
         });
     }

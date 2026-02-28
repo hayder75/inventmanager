@@ -10,7 +10,7 @@ const prisma_1 = require("../utils/prisma");
 const library_1 = require("@prisma/client/runtime/library");
 async function createExpense(req, res) {
     try {
-        const { expenseType, expenseDate, description, amount, paymentMethod, bankType, bankTransferImageUrl, customPaymentNote } = req.body;
+        const { expenseType, expenseDate, description, amount, paymentMethod, bankType, bankTransferImageUrl, customPaymentNote, salespersonId } = req.body;
         if (!expenseType || !expenseDate || !description || !amount || !paymentMethod) {
             return res.status(400).json({
                 error: 'Expense type, date, description, amount, and payment method are required',
@@ -24,20 +24,47 @@ async function createExpense(req, res) {
         if (!req.user) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
+        // If salespersonId is provided, verify it exists and is a SALES user
+        // If not provided and current user is SALES, auto-assign to themselves
+        let validatedSalespersonId = null;
+        if (salespersonId) {
+            const salesperson = await prisma_1.prisma.user.findFirst({
+                where: { id: salespersonId, role: 'SALES' },
+            });
+            if (!salesperson) {
+                return res.status(400).json({
+                    error: 'Invalid salesperson ID. Must be a user with SALES role.',
+                });
+            }
+            validatedSalespersonId = salespersonId;
+        }
+        else if (req.user.role === 'SALES') {
+            // Auto-assign to the sales user who created it
+            validatedSalespersonId = req.user.id;
+        }
+        // Store expenseDate as UTC midnight to match daily summary UTC date ranges
+        const parsedExpenseDate = new Date(expenseDate + 'T00:00:00.000Z');
         const expense = await prisma_1.prisma.expense.create({
             data: {
                 expenseType,
-                expenseDate: new Date(expenseDate),
+                expenseDate: parsedExpenseDate,
                 description,
                 amount: new library_1.Decimal(amount),
                 paymentMethod,
                 bankType: paymentMethod === 'BANK_TRANSFER' ? (bankType || null) : null,
                 bankTransferImageUrl: paymentMethod === 'BANK_TRANSFER' ? (bankTransferImageUrl || null) : null,
                 customPaymentNote: ['OTHER', 'SALES'].includes(paymentMethod) ? (customPaymentNote || null) : null,
+                salespersonId: validatedSalespersonId,
                 createdBy: req.user.id,
             },
             include: {
                 creator: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+                salesperson: {
                     select: {
                         id: true,
                         name: true,
@@ -79,6 +106,12 @@ async function getExpenses(req, res) {
             where,
             include: {
                 creator: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+                salesperson: {
                     select: {
                         id: true,
                         name: true,

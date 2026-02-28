@@ -23,6 +23,7 @@ const profitloss_routes_1 = __importDefault(require("./routes/profitloss.routes"
 const settings_routes_1 = __importDefault(require("./routes/settings.routes"));
 const website_routes_1 = __importDefault(require("./routes/website.routes"));
 const upload_routes_1 = __importDefault(require("./routes/upload.routes"));
+const daily_summary_routes_1 = __importDefault(require("./routes/daily-summary.routes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
@@ -53,6 +54,7 @@ app.use('/api/profit-loss', profitloss_routes_1.default);
 app.use('/api/settings', settings_routes_1.default);
 app.use('/api/website', website_routes_1.default);
 app.use('/api/upload', upload_routes_1.default);
+app.use('/api/daily', daily_summary_routes_1.default);
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err);
