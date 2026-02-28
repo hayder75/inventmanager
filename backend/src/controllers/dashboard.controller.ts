@@ -42,15 +42,36 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
       new Decimal(0)
     );
 
-    // Cash Collected = actual cash received (where bankType is NULL)
-    const cashCollected = todaySales
+    // Today's Payments Received (credit collections)
+    const todayPayments = await prisma.paymentReceived.findMany({
+      where: {
+        createdAt: {
+          gte: startOfDayUTC,
+          lt: endOfDayUTC,
+        },
+        ...salespersonFilter, /* Apply salesperson filter if sales user */
+      },
+    });
+
+    // Cash Collected = actual cash received from sales (where bankType is NULL) + CASH payments
+    const cashSalesTotal = todaySales
       .filter(sale => !sale.bankType) // No bank type = cash payment
       .reduce((sum, sale) => sum.plus(sale.totalPaid), new Decimal(0));
+    const cashPaymentsTotal = todayPayments
+      .filter(payment => payment.method === 'CASH')
+      .reduce((sum, payment) => sum.plus(payment.amount), new Decimal(0));
 
-    // Bank Collected = actual bank transfers (where bankType is NOT NULL)
-    const bankCollected = todaySales
+    const cashCollected = cashSalesTotal.plus(cashPaymentsTotal);
+
+    // Bank Collected = actual bank transfers from sales (where bankType is NOT NULL) + BANK_TRANSFER payments
+    const bankSalesTotal = todaySales
       .filter(sale => sale.bankType) // Has bank type = bank transfer
       .reduce((sum, sale) => sum.plus(sale.totalPaid), new Decimal(0));
+    const bankPaymentsTotal = todayPayments
+      .filter(payment => payment.method === 'BANK_TRANSFER')
+      .reduce((sum, payment) => sum.plus(payment.amount), new Decimal(0));
+
+    const bankCollected = bankSalesTotal.plus(bankPaymentsTotal);
 
     const creditSales = todaySales.reduce(
       (sum, sale) => sum.plus(sale.totalCredit),
