@@ -18,6 +18,7 @@ import profitlossRoutes from './routes/profitloss.routes';
 import settingsRoutes from './routes/settings.routes';
 import websiteRoutes from './routes/website.routes';
 import uploadRoutes from './routes/upload.routes';
+import dailySummaryRoutes from './routes/daily-summary.routes';
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.use('/api/profit-loss', profitlossRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/website', websiteRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/daily', dailySummaryRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

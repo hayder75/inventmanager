@@ -27,6 +27,7 @@ import {
   DollarSign,
   TrendingDown,
   Globe,
+  Calendar,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -74,6 +75,7 @@ const adminMenuCategories: MenuCategory[] = [
       { name: 'Cash Flow', href: '/cash-flow', icon: DollarSign },
       { name: 'Bank Deposit', href: '/bank-deposits', icon: CreditCard },
       { name: 'Profit & Loss', href: '/profit-loss', icon: TrendingDown },
+      { name: 'Daily Summary', href: '/daily-summary', icon: Calendar },
       { name: 'Expense Report', href: '/expenses/reports', icon: FileText },
       { name: 'Sales Performance', href: '/dashboard/performance', icon: BarChart3 },
     ]
@@ -101,7 +103,10 @@ const salesMenuCategories: MenuCategory[] = [
   {
     title: 'Dashboard',
     icon: LayoutDashboard,
-    items: [{ name: 'Overview', href: '/dashboard' }]
+    items: [
+      { name: 'Overview', href: '/dashboard' },
+      { name: 'Daily Summary', href: '/daily-summary' }
+    ]
   },
   {
     title: 'Inventory',
@@ -119,6 +124,7 @@ const salesMenuCategories: MenuCategory[] = [
       { name: 'New Sale', href: '/sales/new' },
       { name: 'Sales List', href: '/sales' },
       { name: 'Payments Received', href: '/payments' },
+      { name: 'Daily Summary', href: '/daily-summary' },
     ]
   },
   {

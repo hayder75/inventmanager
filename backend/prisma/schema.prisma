@@ -69,7 +69,8 @@ model User {
   payments      PaymentReceived[]
   stockAdjustments StockAdjustment[]
   contacts      Contact[]
-  expenses      Expense[]
+  createdExpenses Expense[] @relation("ExpenseCreator")
+  salespersonExpenses Expense[] @relation("ExpenseSalesperson")
   dailyOpeningBalances DailyOpeningBalance[]
 
   @@map("users")
@@ -281,12 +282,14 @@ model Expense {
   bankType      String?    
   bankTransferImageUrl String? 
   customPaymentNote String? 
+  salespersonId String?    @map("salesperson_id") // Optional: link to salesperson for deduction from their drawer
   createdBy     String     @map("created_by")
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
 
   // Relations
-  creator       User       @relation(fields: [createdBy], references: [id])
+  creator       User       @relation("ExpenseCreator", fields: [createdBy], references: [id])
+  salesperson   User?      @relation("ExpenseSalesperson", fields: [salespersonId], references: [id])
 
   @@map("expenses")
 }

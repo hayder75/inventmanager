@@ -5,7 +5,7 @@ import { Decimal } from '@prisma/client/runtime/library';
 
 export async function createExpense(req: AuthRequest, res: Response) {
   try {
-    const { expenseType, expenseDate, description, amount, paymentMethod, bankType, bankTransferImageUrl, customPaymentNote } = req.body;
+    const { expenseType, expenseDate, description, amount, paymentMethod, bankType, bankTransferImageUrl, customPaymentNote, salespersonId } = req.body;
 
     if (!expenseType || !expenseDate || !description || !amount || !paymentMethod) {
       return res.status(400).json({
@@ -23,20 +23,48 @@ export async function createExpense(req: AuthRequest, res: Response) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    // If salespersonId is provided, verify it exists and is a SALES user
+    // If not provided and current user is SALES, auto-assign to themselves
+    let validatedSalespersonId = null;
+    if (salespersonId) {
+      const salesperson = await prisma.user.findFirst({
+        where: { id: salespersonId, role: 'SALES' },
+      });
+      if (!salesperson) {
+        return res.status(400).json({
+          error: 'Invalid salesperson ID. Must be a user with SALES role.',
+        });
+      }
+      validatedSalespersonId = salespersonId;
+    } else if (req.user.role === 'SALES') {
+      // Auto-assign to the sales user who created it
+      validatedSalespersonId = req.user.id;
+    }
+
+    // Store expenseDate as UTC midnight to match daily summary UTC date ranges
+    const parsedExpenseDate = new Date(expenseDate + 'T00:00:00.000Z');
+
     const expense = await prisma.expense.create({
       data: {
         expenseType,
-        expenseDate: new Date(expenseDate),
+        expenseDate: parsedExpenseDate,
         description,
         amount: new Decimal(amount),
         paymentMethod,
         bankType: paymentMethod === 'BANK_TRANSFER' ? (bankType || null) : null,
         bankTransferImageUrl: paymentMethod === 'BANK_TRANSFER' ? (bankTransferImageUrl || null) : null,
         customPaymentNote: ['OTHER', 'SALES'].includes(paymentMethod) ? (customPaymentNote || null) : null,
+        salespersonId: validatedSalespersonId,
         createdBy: req.user.id,
       },
       include: {
         creator: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        salesperson: {
           select: {
             id: true,
             name: true,
@@ -84,6 +112,12 @@ export async function getExpenses(req: AuthRequest, res: Response) {
       where,
       include: {
         creator: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        salesperson: {
           select: {
             id: true,
             name: true,
