@@ -503,10 +503,13 @@ export default function NewSalePage() {
                   </div>
                 </button>
               ))}
-              {!showNewProductInput && searchQuery && filteredProducts.length > 0 && (
+              {!showNewProductInput && searchQuery && (
                 <button
                   type="button"
-                  onClick={() => setShowNewProductInput(true)}
+                  onClick={() => {
+                    setNewProductName(searchQuery);
+                    setShowNewProductInput(true);
+                  }}
                   className="w-full px-4 py-2 text-left text-primary-600 hover:bg-gray-50 border-b border-gray-200"
                 >
                   + Create new product: {searchQuery}
