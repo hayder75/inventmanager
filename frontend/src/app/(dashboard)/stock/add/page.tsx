@@ -239,25 +239,9 @@ export default function AddStockPage() {
                               <div className="text-xs text-gray-500">{product.code} | Stock: {product.stockQty}</div>
                             </button>
                           ))}
-                        {productSearch[index] && !products.some(p => p.name.toLowerCase() === (productSearch[index] || '').toLowerCase()) && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setShowProductDropdown({ ...showProductDropdown, [index]: false });
-                              updateEntry(index, { 
-                                productId: undefined,
-                                productName: productSearch[index],
-                                productCode: ''
-                              });
-                            }}
-                            className="w-full px-3 py-2 text-left text-primary-600 hover:bg-gray-50 border-t border-gray-100"
-                          >
-                            + Create new product: <span className="font-medium">{productSearch[index]}</span>
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                        </div>
+                      )}
+                    </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
                     {showNewCategoryInput[index] ? (
