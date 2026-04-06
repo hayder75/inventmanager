@@ -45,6 +45,35 @@ export async function getProducts(req: AuthRequest, res: Response) {
   }
 }
 
+export async function createProduct(req: AuthRequest, res: Response) {
+  try {
+    const { name, code, category, unit, costPrice, sellingPrice, stockQty, piecesPerUnit, lowStockAlert } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'Product name is required' });
+    }
+
+    const product = await prisma.product.create({
+      data: {
+        name,
+        code: code || null,
+        category: category || null,
+        unit: unit || 'pcs',
+        piecesPerUnit: piecesPerUnit || 1,
+        costPrice: new Decimal(costPrice || 0),
+        sellingPrice: new Decimal(sellingPrice || 0),
+        stockQty: stockQty || 0,
+        lowStockAlert: lowStockAlert ?? 10,
+      },
+    });
+
+    res.status(201).json(product);
+  } catch (error: any) {
+    console.error('Create product error:', error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+}
+
 export async function getProductById(req: AuthRequest, res: Response) {
   try {
     const { id } = req.params;

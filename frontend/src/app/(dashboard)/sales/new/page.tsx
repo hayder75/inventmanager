@@ -56,6 +56,8 @@ export default function NewSalePage() {
     vat_enabled: false,
     tot_enabled: false,
   });
+  const [showNewProductInput, setShowNewProductInput] = useState(false);
+  const [newProductName, setNewProductName] = useState('');
 
   useEffect(() => {
     fetchCompanies();
@@ -133,7 +135,7 @@ export default function NewSalePage() {
       productName: product.name,
       quantity: 1,
       adminPrice,
-      overriddenPrice: adminPrice, // Set initial price to admin price
+      overriddenPrice: adminPrice,
       finalPrice: adminPrice,
       subtotal: adminPrice,
       surplusAmount: 0,
@@ -148,6 +150,50 @@ export default function NewSalePage() {
     };
     setItems([...items, newItem]);
     setSearchQuery('');
+  };
+
+  const handleCreateNewProduct = async () => {
+    if (!newProductName.trim()) {
+      alert('Please enter a product name');
+      return;
+    }
+    try {
+      const response = await api.post('/api/products', {
+        name: newProductName.trim(),
+        costPrice: 0,
+        sellingPrice: 0,
+        stockQty: 0,
+      });
+      const newProduct = response.data;
+      if (newProduct) {
+        const adminPrice = parseFloat(newProduct.sellingPrice) || 0;
+        const newItem: SaleItem = {
+          productId: newProduct.id,
+          productName: newProduct.name,
+          quantity: 1,
+          adminPrice,
+          overriddenPrice: adminPrice,
+          finalPrice: adminPrice,
+          subtotal: adminPrice,
+          surplusAmount: 0,
+          adminCutType: 'percentage',
+          adminCutValue: 0,
+          adminCutAmount: 0,
+          remainingSurplus: 0,
+          salespersonGetsCommission: false,
+          salespersonCommissionType: 'percentage',
+          salespersonCommissionValue: 0,
+          salespersonCommissionAmount: 0,
+        };
+        setItems([...items, newItem]);
+        setSearchQuery('');
+        setNewProductName('');
+        setShowNewProductInput(false);
+        fetchProducts();
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Failed to create product');
+    }
   };
 
   const calculateSurplus = (item: SaleItem): number => {
@@ -457,6 +503,48 @@ export default function NewSalePage() {
                   </div>
                 </button>
               ))}
+              {!showNewProductInput && searchQuery && filteredProducts.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowNewProductInput(true)}
+                  className="w-full px-4 py-2 text-left text-primary-600 hover:bg-gray-50 border-b border-gray-200"
+                >
+                  + Create new product: {searchQuery}
+                </button>
+              )}
+            </div>
+          )}
+
+          {showNewProductInput && (
+            <div className="border border-primary-300 rounded-lg p-3 bg-primary-50 mt-2">
+              <p className="text-sm font-medium text-primary-700 mb-2">Create New Product</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newProductName}
+                  onChange={(e) => setNewProductName(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  placeholder="Product name"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={handleCreateNewProduct}
+                  className="px-3 py-2 bg-primary-600 text-white rounded-lg text-sm"
+                >
+                  Create
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNewProductInput(false);
+                    setNewProductName('');
+                  }}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
 

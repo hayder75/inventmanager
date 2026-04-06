@@ -6,6 +6,7 @@ import {
   deleteProduct,
   getCategories,
   getProductMetrics,
+  createProduct,
 } from '../controllers/products.controller';
 import { authenticate, requireRole } from '../middleware/auth.middleware';
 
@@ -14,6 +15,7 @@ const router = express.Router();
 router.get('/', authenticate, requireRole('ADMIN', 'SALES'), getProducts);
 router.get('/metrics', authenticate, requireRole('ADMIN'), getProductMetrics);
 router.get('/categories', authenticate, requireRole('ADMIN', 'SALES'), getCategories);
+router.post('/', authenticate, requireRole('ADMIN', 'SALES'), createProduct);
 
 router.get('/:id', authenticate, requireRole('ADMIN', 'SALES'), getProductById);
 router.patch('/:id', authenticate, requireRole('ADMIN', 'SALES'), updateProduct);
