@@ -43,8 +43,6 @@ interface SaleItem {
 export default function NewSalePage() {
   const router = useRouter();
   const [buyerType, setBuyerType] = useState<'walkin' | 'company'>('walkin');
-  const [walkinName, setWalkinName] = useState('');
-  const [walkinPhone, setWalkinPhone] = useState('');
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -321,8 +319,8 @@ export default function NewSalePage() {
 
       await api.post('/api/sales', {
         companyId: buyerType === 'company' ? selectedCompanyId : null,
-        walkinName: buyerType === 'walkin' ? walkinName : null,
-        walkinPhone: buyerType === 'walkin' ? walkinPhone : null,
+        walkinName: null,
+        walkinPhone: null,
         items: items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -398,31 +396,8 @@ export default function NewSalePage() {
           </div>
 
           {buyerType === 'walkin' ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={walkinName}
-                  onChange={(e) => setWalkinName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Customer name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
-                <input
-                  type="text"
-                  value={walkinPhone}
-                  onChange={(e) => setWalkinPhone(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Phone number"
-                />
-              </div>
+            <div className="text-sm text-gray-600">
+              Walk-in customer - proceed to add products below
             </div>
           ) : (
             <div>
@@ -529,6 +504,11 @@ export default function NewSalePage() {
                         {hasSurplus && (
                           <div className="mt-2 text-sm text-green-600 font-medium">
                             Surplus: ${surplus.toFixed(2)}
+                          </div>
+                        )}
+                        {!hasSurplus && item.finalPrice < item.adminPrice && (
+                          <div className="mt-2 text-sm text-orange-600 font-medium">
+                            Below Admin: ${(item.adminPrice - item.finalPrice).toFixed(2)}
                           </div>
                         )}
                       </div>

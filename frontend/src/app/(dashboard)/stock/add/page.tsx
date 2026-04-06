@@ -1,9 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import { Plus, X, Save } from 'lucide-react';
+import { Plus, X, Save, Search } from 'lucide-react';
+
+interface Product {
+  id: string;
+  name: string;
+  code: string | null;
+  category: string | null;
+  stockQty: number;
+  costPrice: string;
+  sellingPrice: string;
+}
 
 interface StockEntry {
   productId?: string;
@@ -38,10 +48,28 @@ export default function AddStockPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<{ [key: number]: string }>({});
   const [showNewCategoryInput, setShowNewCategoryInput] = useState<{ [key: number]: boolean }>({});
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productSearch, setProductSearch] = useState<{ [key: number]: string }>({});
+  const [showProductDropdown, setShowProductDropdown] = useState<{ [key: number]: boolean }>({});
+  const productDropdownRef = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     fetchCategories();
+    fetchProducts();
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
   }, []);
+
+  const handleClickOutside = (e: MouseEvent) => {
+    Object.keys(productDropdownRef.current).forEach((index) => {
+      const ref = productDropdownRef.current[parseInt(index)];
+      if (ref && !ref.contains(e.target as Node)) {
+        setShowProductDropdown((prev) => ({ ...prev, [parseInt(index)]: false }));
+      }
+    });
+  };
 
   const fetchCategories = async () => {
     try {
@@ -49,6 +77,15 @@ export default function AddStockPage() {
       setCategories(response.data);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get('/api/products');
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
     }
   };
 
@@ -81,13 +118,27 @@ export default function AddStockPage() {
     setLoading(true);
 
     try {
-      // Clean up entries - ensure selling price is set and supplier is optional
-      const cleanedEntries = entries.map(entry => ({
-        ...entry,
-        sellingPrice: entry.sellingPrice || (entry.costPrice > 0 ? entry.costPrice * 1.5 : 0),
-        supplierName: entry.supplierName || undefined,
-      }));
-      await api.post('/api/stock/add', cleanedEntries);
+      const cleanedEntries = entries.map(entry => {
+        const searchValue = productSearch[entries.indexOf(entry)] || '';
+        const isNewProduct = searchValue && !entry.productId;
+        
+        return {
+          ...entry,
+          productName: isNewProduct ? searchValue : entry.productName,
+          productCode: isNewProduct ? entry.productCode : entry.productCode,
+          sellingPrice: entry.sellingPrice || (entry.costPrice > 0 ? entry.costPrice * 1.5 : 0),
+          supplierName: entry.supplierName || undefined,
+        };
+      });
+      
+      const validEntries = cleanedEntries.filter(entry => entry.productName || entry.productId);
+      if (validEntries.length === 0) {
+        alert('Please add at least one product');
+        setLoading(false);
+        return;
+      }
+
+      await api.post('/api/stock/add', validEntries);
       router.push('/products');
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to add stock';
@@ -126,17 +177,75 @@ export default function AddStockPage() {
             {entries.map((entry, index) => (
               <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-3">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div>
+                  <div className="relative" ref={(el) => { productDropdownRef.current[index] = el; }}>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Product Name/Code
                     </label>
-                    <input
-                      type="text"
-                      value={entry.productName || ''}
-                      onChange={(e) => updateEntry(index, { productName: e.target.value })}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                      placeholder="Type to create new"
-                    />
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={productSearch[index] || ''}
+                        onChange={(e) => {
+                          setProductSearch({ ...productSearch, [index]: e.target.value });
+                          setShowProductDropdown({ ...showProductDropdown, [index]: true });
+                        }}
+                        onFocus={() => {
+                          setShowProductDropdown({ ...showProductDropdown, [index]: true });
+                        }}
+                        className="w-full pl-8 pr-2 py-1 text-sm border border-gray-300 rounded"
+                        placeholder="Search or type new"
+                      />
+                      {entry.productName && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            updateEntry(index, { productId: undefined, productName: undefined, productCode: undefined });
+                            setProductSearch({ ...productSearch, [index]: '' });
+                          }}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    {showProductDropdown[index] && (productSearch[index] || entry.productName) && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        {products
+                          .filter(p => 
+                            p.name.toLowerCase().includes((productSearch[index] || '').toLowerCase()) ||
+                            p.code?.toLowerCase().includes((productSearch[index] || '').toLowerCase())
+                          )
+                          .slice(0, 10)
+                          .map(product => (
+                            <button
+                              key={product.id}
+                              type="button"
+                              onClick={() => {
+                                updateEntry(index, { 
+                                  productId: product.id, 
+                                  productName: product.name, 
+                                  productCode: product.code || undefined,
+                                  category: product.category || undefined,
+                                  costPrice: parseFloat(product.costPrice) || 0,
+                                  sellingPrice: parseFloat(product.sellingPrice) || 0
+                                });
+                                setProductSearch({ ...productSearch, [index]: product.name });
+                                setShowProductDropdown({ ...showProductDropdown, [index]: false });
+                              }}
+                              className="w-full px-3 py-2 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                            >
+                              <div className="text-sm font-medium">{product.name}</div>
+                              <div className="text-xs text-gray-500">{product.code} | Stock: {product.stockQty}</div>
+                            </button>
+                          ))}
+                        {(productSearch[index] && !products.some(p => p.name.toLowerCase() === (productSearch[index] || '').toLowerCase())) && (
+                          <div className="px-3 py-2 text-sm text-gray-500 border-t border-gray-100">
+                            Type to create new product: <span className="font-medium">{productSearch[index]}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>

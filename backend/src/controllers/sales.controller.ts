@@ -78,12 +78,7 @@ export async function createSale(req: AuthRequest, res: Response) {
           error: `Insufficient stock for ${product.name}. Available: ${product.stockQty} ${product.unit || 'units'} (${availablePieces} pieces), Requested: ${item.quantity} ${saleUnit}` 
         });
       }
-      // Validate price override (can only increase)
-      if (item.overriddenPrice && item.overriddenPrice < item.adminPrice) {
-        return res.status(400).json({ 
-          error: `Cannot decrease price below admin price for ${product.name}` 
-        });
-      }
+      // Allow any price - no validation on price override
     }
 
     // Get settings
