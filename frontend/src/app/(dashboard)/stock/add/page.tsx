@@ -118,8 +118,8 @@ export default function AddStockPage() {
     setLoading(true);
 
     try {
-      const cleanedEntries = entries.map(entry => {
-        const searchValue = productSearch[entries.indexOf(entry)] || '';
+      const cleanedEntries = entries.map((entry, index) => {
+        const searchValue = productSearch[index] || '';
         const isNewProduct = searchValue && !entry.productId;
         
         return {
