@@ -41,3 +41,8 @@ yarn-error.log*
 next-env.d.ts
 node_modules/
 .next/
+
+# build artifacts
+dist/
+backend/dist/
+build/

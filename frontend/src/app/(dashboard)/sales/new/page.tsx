@@ -43,6 +43,8 @@ interface SaleItem {
 export default function NewSalePage() {
   const router = useRouter();
   const [buyerType, setBuyerType] = useState<'walkin' | 'company'>('walkin');
+  const [walkinName, setWalkinName] = useState('');
+  const [walkinPhone, setWalkinPhone] = useState('');
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -133,7 +135,7 @@ export default function NewSalePage() {
       productName: product.name,
       quantity: 1,
       adminPrice,
-      overriddenPrice: adminPrice,
+      overriddenPrice: adminPrice, // Set initial price to admin price
       finalPrice: adminPrice,
       subtotal: adminPrice,
       surplusAmount: 0,
@@ -150,27 +152,214 @@ export default function NewSalePage() {
     setSearchQuery('');
   };
 
-  const handleAddNewProductDirectly = async () => {
-    if (!searchQuery.trim()) {
-      alert('Please enter a product name');
-      return;
+  const calculateSurplus = (item: SaleItem): number => {
+    if (item.finalPrice > item.adminPrice) {
+      return (item.finalPrice - item.adminPrice) * item.quantity;
     }
-    try {
-      const response = await api.post('/api/products', {
-        name: searchQuery.trim(),
-        costPrice: 0,
-        sellingPrice: 0,
-        stockQty: 0,
-      });
-      const newProduct = response.data;
-      if (newProduct) {
-        addProductFromSearch(newProduct);
-        fetchProducts();
-      }
-    } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to create product');
+    return 0;
+  };
+
+  const calculateAdminCut = (item: SaleItem): number => {
+    const surplus = calculateSurplus(item);
+    if (surplus <= 0 || !item.adminCutValue) return 0;
+    
+    if (item.adminCutType === 'percentage') {
+      return (surplus * item.adminCutValue) / 100;
+    } else {
+      return Math.min(item.adminCutValue, surplus); // Can't exceed surplus
     }
   };
+
+  const calculateRemainingSurplus = (item: SaleItem): number => {
+    const surplus = calculateSurplus(item);
+    const adminCut = calculateAdminCut(item);
+    return Math.max(0, surplus - adminCut);
+  };
+
+  const calculateSalespersonCommission = (item: SaleItem): number => {
+    if (!item.salespersonGetsCommission || !item.salespersonCommissionValue) return 0;
+    const remainingSurplus = calculateRemainingSurplus(item);
+    
+    if (item.salespersonCommissionType === 'percentage') {
+      return (remainingSurplus * item.salespersonCommissionValue) / 100;
+    } else {
+      return Math.min(item.salespersonCommissionValue, remainingSurplus); // Can't exceed remaining surplus
+    }
+  };
+
+  const updateItem = (index: number, updates: Partial<SaleItem>, isInitialCreation = false) => {
+    const updatedItems = [...items];
+    const item = updatedItems[index];
+    
+    if (updates.quantity !== undefined) {
+      item.quantity = updates.quantity;
+    }
+    if (updates.overriddenPrice !== undefined) {
+      const newPrice = parseFloat(updates.overriddenPrice.toString());
+      // Allow any price editing - no restrictions
+      item.overriddenPrice = isNaN(newPrice) ? item.adminPrice : newPrice;
+      item.finalPrice = item.overriddenPrice;
+    }
+    item.subtotal = item.finalPrice * item.quantity;
+    
+    // Update surplus-related fields
+    item.surplusAmount = calculateSurplus(item);
+    item.adminCutAmount = calculateAdminCut(item);
+    item.remainingSurplus = calculateRemainingSurplus(item);
+    item.salespersonCommissionAmount = calculateSalespersonCommission(item);
+    
+    // Apply updates
+    Object.assign(item, updates);
+    
+    // Recalculate after updates
+    item.surplusAmount = calculateSurplus(item);
+    item.adminCutAmount = calculateAdminCut(item);
+    item.remainingSurplus = calculateRemainingSurplus(item);
+    item.salespersonCommissionAmount = calculateSalespersonCommission(item);
+    
+    updatedItems[index] = item;
+    setItems(updatedItems);
+  };
+
+  const removeItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index));
+  };
+
+  const addPaymentMethod = () => {
+    const total = calculateTotal();
+    const currentTotal = paymentMethods.reduce((sum, pm) => sum + pm.amount, 0);
+    const remaining = Math.max(0, total - currentTotal);
+    // If credit user, default to CREDIT, otherwise CASH
+    const defaultMethod = buyerType === 'company' ? 'CREDIT' : 'CASH';
+    setPaymentMethods([...paymentMethods, { method: defaultMethod, amount: remaining }]);
+  };
+
+  const updatePaymentMethod = (index: number, method: 'CASH' | 'BANK_TRANSFER' | 'CREDIT', amount: number) => {
+    const updated = [...paymentMethods];
+    updated[index] = { method, amount };
+    setPaymentMethods(updated);
+  };
+
+  const removePaymentMethod = (index: number) => {
+    setPaymentMethods(paymentMethods.filter((_, i) => i !== index));
+  };
+
+  const calculateSubtotal = () => {
+    // Subtotal should be based on what customer actually pays (finalPrice * quantity)
+    // The surplus management is just for tracking/admin purposes, not for calculating sale total
+    return items.reduce((sum, item) => {
+      // Customer pays based on finalPrice (what salesperson entered)
+      return sum + (item.finalPrice * item.quantity);
+    }, 0);
+  };
+
+  const calculateVAT = () => {
+    if (!settings.vat_enabled) return 0;
+    return calculateSubtotal() * 0.075;
+  };
+
+  const calculateTOT = () => {
+    if (!settings.tot_enabled || settings.vat_enabled) return 0;
+    return calculateSubtotal() * 0.03;
+  };
+
+  const calculateTotal = () => {
+    return calculateSubtotal() + calculateVAT() + calculateTOT();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const total = calculateTotal();
+      const totalPaid = paymentMethods
+        .filter(pm => pm.method !== 'CREDIT')
+        .reduce((sum, pm) => sum + pm.amount, 0);
+      const totalCredit = paymentMethods
+        .filter(pm => pm.method === 'CREDIT')
+        .reduce((sum, pm) => sum + pm.amount, 0);
+
+      // Allow payment to be equal or greater than total (sales can receive more)
+      // But show a warning if payment exceeds total significantly
+      const paymentTotal = totalPaid + totalCredit;
+      if (paymentTotal < total) {
+        alert('Payment methods must be at least equal to total amount');
+        setLoading(false);
+        return;
+      }
+      
+      // If payment is greater than total, that's fine (sales can receive extra)
+      // No need to show error, just proceed
+
+      if (buyerType === 'company' && !selectedCompanyId) {
+        alert('Please select a credit user');
+        setLoading(false);
+        return;
+      }
+
+      if (buyerType === 'company' && totalCredit > 0) {
+        const company = companies.find(c => c.id === selectedCompanyId);
+        if (company) {
+          const currentBalance = parseFloat(company.currentBalance);
+          const creditLimit = parseFloat(company.creditLimit);
+          const availableCredit = creditLimit - currentBalance;
+          const newBalance = currentBalance + totalCredit;
+          
+          if (newBalance > creditLimit) {
+            alert(`Credit limit will be exceeded. Available credit: ${availableCredit.toLocaleString()}, Requested: ${totalCredit.toLocaleString()}`);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
+      const subtotal = calculateSubtotal();
+      const vatAmount = calculateVAT();
+      const totAmount = calculateTOT();
+      const totalAmount = calculateTotal();
+
+      await api.post('/api/sales', {
+        companyId: buyerType === 'company' ? selectedCompanyId : null,
+        walkinName: buyerType === 'walkin' ? walkinName : null,
+        walkinPhone: buyerType === 'walkin' ? walkinPhone : null,
+        items: items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          adminPrice: item.adminPrice,
+          overriddenPrice: item.overriddenPrice || null,
+          finalPrice: item.finalPrice,
+          // Surplus management data
+          surplusAmount: item.surplusAmount || 0,
+          adminCutType: item.adminCutType || null,
+          adminCutValue: item.adminCutValue || 0,
+          adminCutAmount: item.adminCutAmount || 0,
+          remainingSurplus: item.remainingSurplus || 0,
+          salespersonGetsCommission: item.salespersonGetsCommission || false,
+          salespersonCommissionType: item.salespersonCommissionType || null,
+          salespersonCommissionValue: item.salespersonCommissionValue || 0,
+          salespersonCommissionAmount: item.salespersonCommissionAmount || 0,
+        })),
+        paymentMethods,
+        bankTransferImageUrl: bankTransferImage,
+        subtotal, // Send calculated subtotal (based on salesperson's entered prices)
+        vatAmount,
+        totAmount,
+        totalAmount,
+      });
+
+      router.push('/sales');
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Failed to create sale');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.code?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -209,8 +398,31 @@ export default function NewSalePage() {
           </div>
 
           {buyerType === 'walkin' ? (
-            <div className="text-sm text-gray-600">
-              Walk-in customer - proceed to add products below
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={walkinName}
+                  onChange={(e) => setWalkinName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Customer name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone
+                </label>
+                <input
+                  type="text"
+                  value={walkinPhone}
+                  onChange={(e) => setWalkinPhone(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Phone number"
+                />
+              </div>
             </div>
           ) : (
             <div>
@@ -257,7 +469,7 @@ export default function NewSalePage() {
                 <button
                   key={product.id}
                   type="button"
-                  onClick={() => addProductFromSearch(product)}
+                  onClick={() => addProduct(product)}
                   className="w-full px-4 py-2 text-left hover:bg-gray-50 border-b border-gray-200 last:border-0"
                 >
                   <div className="flex justify-between">
@@ -270,31 +482,8 @@ export default function NewSalePage() {
                   </div>
                 </button>
               ))}
-              {filteredProducts.length === 0 && (
-                <div className="px-4 py-3 text-sm text-gray-500">
-                  No products found. Just enter product name in search box above and click "Add to Sale" to create it automatically.
-                </div>
-              )}
             </div>
           )}
-
-          <div className="mt-2 flex gap-2">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
-              placeholder="Type product name here if not in list..."
-            />
-            <button
-              type="button"
-              onClick={handleAddNewProductDirectly}
-              disabled={!searchQuery.trim()}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
-            >
-              Add to Sale
-            </button>
-          </div>
 
           {/* Items List */}
           {items.length > 0 && (
@@ -340,11 +529,6 @@ export default function NewSalePage() {
                         {hasSurplus && (
                           <div className="mt-2 text-sm text-green-600 font-medium">
                             Surplus: ${surplus.toFixed(2)}
-                          </div>
-                        )}
-                        {!hasSurplus && item.finalPrice < item.adminPrice && (
-                          <div className="mt-2 text-sm text-orange-600 font-medium">
-                            Below Admin: ${(item.adminPrice - item.finalPrice).toFixed(2)}
                           </div>
                         )}
                       </div>
