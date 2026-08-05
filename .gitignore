@@ -46,3 +46,6 @@ node_modules/
 dist/
 backend/dist/
 build/
+
+# credentials
+DEPLOY.md
