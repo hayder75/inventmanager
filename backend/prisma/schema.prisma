@@ -52,6 +52,20 @@ enum ExpenseType {
   OTHER
 }
 
+enum SalesAdjustmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  MORE_INFO
+}
+
+enum SalesAdjustmentAction {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  MORE_INFO_REQUESTED
+}
+
 // Users table
 model User {
   id            String   @id @default(uuid())
@@ -72,6 +86,9 @@ model User {
   createdExpenses Expense[] @relation("ExpenseCreator")
   salespersonExpenses Expense[] @relation("ExpenseSalesperson")
   dailyOpeningBalances DailyOpeningBalance[]
+  salesAdjustmentRequests SalesAdjustmentRequest[] @relation("AdjustmentRequester")
+  approvedAdjustments SalesAdjustmentRequest[] @relation("AdjustmentApprover")
+  salesAdjustmentAudits SalesAdjustmentAudit[] @relation("AdjustmentAuditActor")
 
   @@map("users")
 }
@@ -136,6 +153,7 @@ model Product {
   stockEntries  StockEntry[]
   saleItems     SaleItem[]
   stockAdjustments StockAdjustment[]
+  adjustmentRequests SalesAdjustmentRequest[]
 
   @@map("products")
 }
@@ -204,6 +222,7 @@ model Sale {
   salesperson   User     @relation(fields: [salespersonId], references: [id])
   items         SaleItem[]
   payments      PaymentReceived[]
+  adjustmentRequests SalesAdjustmentRequest[]
 
   @@map("sales")
 }
@@ -348,6 +367,57 @@ model WebsiteSetting {
   updatedBy     String?  @map("updated_by")
 
   @@map("website_settings")
+}
+
+// Sales Adjustment Requests - completed sales are not edited directly
+model SalesAdjustmentRequest {
+  id            String   @id @default(uuid())
+  requestNumber String   @unique @map("request_number")
+  requestedById String   @map("requested_by_id")
+  saleId        String?  @map("sale_id")
+  invoiceNumber String?  @map("invoice_number")
+  voucherNumber String?  @map("voucher_number")
+  referenceNumber String? @map("reference_number")
+  productId     String?  @map("product_id")
+  productName   String   @map("product_name")
+  originalQuantity Int   @map("original_quantity")
+  correctQuantity   Int   @map("correct_quantity")
+  adjustmentDifference Int @map("adjustment_difference")
+  reason        String
+  supportingNotes String? @map("supporting_notes")
+  status        SalesAdjustmentStatus @default(PENDING)
+  approvedById  String?  @map("approved_by_id")
+  approvalDate  DateTime? @map("approval_date")
+  remarks       String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  requestedBy   User     @relation("AdjustmentRequester", fields: [requestedById], references: [id])
+  approvedBy    User?    @relation("AdjustmentApprover", fields: [approvedById], references: [id])
+  sale          Sale?    @relation(fields: [saleId], references: [id])
+  product       Product? @relation(fields: [productId], references: [id])
+  audits        SalesAdjustmentAudit[]
+
+  @@map("sales_adjustment_requests")
+}
+
+// Permanent, non-editable audit trail for sales adjustments
+model SalesAdjustmentAudit {
+  id            String   @id @default(uuid())
+  requestId     String   @map("request_id")
+  action        SalesAdjustmentAction
+  actorId       String?  @map("actor_id")
+  actorName     String?  @map("actor_name")
+  originalValues Json?   @map("original_values")
+  updatedValues Json?    @map("updated_values")
+  decision      String?
+  ipAddress     String?  @map("ip_address")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  request       SalesAdjustmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  actor         User?    @relation("AdjustmentAuditActor", fields: [actorId], references: [id])
+
+  @@map("sales_adjustment_audits")
 }
 
 

@@ -60,9 +60,9 @@ export default function Footer() {
                                 <span>Hawassa, Ethiopia</span>
                             </li>
                             <li>
-                                <a href="tel:0916581946" className="flex items-center gap-3 text-primary-300 hover:text-brand-light transition-colors">
+                                <a href="tel:0916581943" className="flex items-center gap-3 text-primary-300 hover:text-brand-light transition-colors">
                                     <Phone size={20} className="text-brand-light shrink-0" />
-                                    <span>0916581946 / 0993939599</span>
+                                    <span>0916581943 / 0993939599</span>
                                 </a>
                             </li>
                             <li>
@@ -72,9 +72,9 @@ export default function Footer() {
                                 </a>
                             </li>
                             <li>
-                                <a href="https://wa.me/251916581946" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-primary-300 hover:text-brand-light transition-colors">
+                                <a href="https://wa.me/251916581943" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-primary-300 hover:text-brand-light transition-colors">
                                     <MessageCircle size={20} className="text-brand-light shrink-0" />
-                                    <span>0916581946</span>
+                                    <span>0916581943</span>
                                 </a>
                                 <span className="text-xs text-primary-400 ml-8">WhatsApp/Telegram</span>
                             </li>

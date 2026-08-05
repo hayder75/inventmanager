@@ -174,7 +174,7 @@ export default function SalesPage() {
               <div class="company-header">
                 <h1>Real Bright Trading PLC</h1>
                 <p>Hawasa</p>
-                <p>Phone: 0912345678</p>
+                <p>Phone: 0916581943 / 0993939599</p>
               </div>
               
               <div class="invoice-info">

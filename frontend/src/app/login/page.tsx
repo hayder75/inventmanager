@@ -291,7 +291,7 @@ export default function LoginPage() {
               <p>© 2025 Real-Bright-Trading. All rights reserved.</p>
             </div>
             <div className="text-sm" style={{ color: '#1921D9' }}>
-              <p className="font-medium">Powered by <span className="font-bold">Easy Tech</span></p>
+              <p className="font-medium">Powered by <span className="font-bold">EnglesTech</span></p>
             </div>
           </div>
         </div>

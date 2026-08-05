@@ -57,25 +57,10 @@ export async function createSale(req: AuthRequest, res: Response) {
       if (!product) {
         return res.status(404).json({ error: `Product ${item.productId} not found` });
       }
-      
-      // Determine sale unit (default to pieces if not specified)
-      const saleUnit = item.saleUnit || 'pieces';
-      const piecesPerUnit = product.piecesPerUnit || 1;
-      
-      // Convert sale quantity to stock units
-      let quantityInStockUnits: number;
-      if (saleUnit === 'pack' && product.unit && product.unit.toLowerCase() !== 'pcs') {
-        // Selling in packs, stock is in packs - direct match
-        quantityInStockUnits = item.quantity;
-      } else {
-        // Selling in pieces, convert to stock units
-        quantityInStockUnits = Math.ceil(item.quantity / piecesPerUnit);
-      }
-      
-      if (product.stockQty < quantityInStockUnits) {
-        const availablePieces = product.stockQty * piecesPerUnit;
-        return res.status(400).json({ 
-          error: `Insufficient stock for ${product.name}. Available: ${product.stockQty} ${product.unit || 'units'} (${availablePieces} pieces), Requested: ${item.quantity} ${saleUnit}` 
+
+      if (product.stockQty < item.quantity) {
+        return res.status(400).json({
+          error: `Insufficient stock for ${product.name}. Available: ${product.stockQty} ${product.unit || 'units'}, Requested: ${item.quantity}`
         });
       }
       // Allow any price - no validation on price override
@@ -269,27 +254,16 @@ export async function createSale(req: AuthRequest, res: Response) {
         },
       });
 
-      // Update stock for each item
+      // Update stock for each item (deduct exact quantity sold)
       for (const item of items) {
         const product = await tx.product.findUnique({ where: { id: item.productId } });
         if (!product) continue;
-        
-        // Convert sale quantity to stock units
-        const saleUnit = item.saleUnit || 'pieces';
-        const piecesPerUnit = product.piecesPerUnit || 1;
-        
-        let quantityInStockUnits: number;
-        if (saleUnit === 'pack' && product.unit && product.unit.toLowerCase() !== 'pcs') {
-          quantityInStockUnits = item.quantity; // Direct pack-to-pack
-        } else {
-          quantityInStockUnits = Math.ceil(item.quantity / piecesPerUnit); // Pieces to packs
-        }
-        
+
         await tx.product.update({
           where: { id: item.productId },
           data: {
             stockQty: {
-              decrement: quantityInStockUnits,
+              decrement: item.quantity,
             },
           },
         });

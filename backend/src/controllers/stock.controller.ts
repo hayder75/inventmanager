@@ -43,29 +43,25 @@ export async function addStock(req: AuthRequest, res: Response) {
             throw new Error('Product name is required when creating new product');
           }
 
+          if (!entry.category || !entry.category.trim()) {
+            throw new Error('Category is required.');
+          }
+
           // Calculate selling price - use provided or default to 50% markup
           const calculatedSellingPrice = (entry.sellingPrice && entry.sellingPrice > 0) 
             ? entry.sellingPrice 
             : (entry.costPrice > 0 ? entry.costPrice * 1.5 : 0);
-          
-          // Determine piecesPerUnit based on the unit
-          let piecesPerUnit = 1;
+
+          // Stock is tracked in single units
           const unit = entry.unit || 'pcs';
-          if (unit.toLowerCase() === 'pak' || unit.toLowerCase() === 'pack') {
-            piecesPerUnit = 10; // Default: 1 pack = 10 pieces
-          } else if (unit.toLowerCase() === 'reem') {
-            piecesPerUnit = 500; // 1 reem = 500 pieces
-          } else if (unit.toLowerCase() === 'set') {
-            piecesPerUnit = 1;
-          }
 
           const newProduct = await tx.product.create({
             data: {
               name: entry.productName,
               code: entry.productCode || null,
-              category: entry.category || null,
+              category: entry.category.trim(),
               unit: unit,
-              piecesPerUnit: piecesPerUnit,
+              piecesPerUnit: 1,
               costPrice: new Decimal(entry.costPrice),
               sellingPrice: new Decimal(calculatedSellingPrice),
               stockQty: entry.quantity,
@@ -80,24 +76,8 @@ export async function addStock(req: AuthRequest, res: Response) {
             throw new Error(`Product ${productId} not found`);
           }
 
-          // Calculate quantity increment based on unit
-          let quantityToAdd = entry.quantity;
-          const entryUnit = entry.unit || existingProduct.unit || 'pcs';
-          
-          // If adding in pieces but product is in packs, convert
-          if (entryUnit.toLowerCase() === 'pcs' && existingProduct.unit && existingProduct.unit.toLowerCase() === 'pak') {
-            const piecesPerUnit = existingProduct.piecesPerUnit || 10;
-            quantityToAdd = Math.ceil(entry.quantity / piecesPerUnit); // Convert pieces to packs
-          }
-          // If adding in packs but product is in pieces, convert
-          else if (entryUnit.toLowerCase() === 'pak' && existingProduct.unit && existingProduct.unit.toLowerCase() === 'pcs') {
-            const piecesPerUnit = 10; // Default conversion
-            quantityToAdd = entry.quantity * piecesPerUnit; // Convert packs to pieces
-          }
-          // If units match or product has no unit, use as-is
-          else if (entryUnit.toLowerCase() === existingProduct.unit?.toLowerCase() || !existingProduct.unit) {
-            quantityToAdd = entry.quantity;
-          }
+          // Stock is tracked in single units - quantity is added as-is
+          const quantityToAdd = entry.quantity;
 
           // Update existing product stock
           const updateData: any = {
@@ -115,14 +95,11 @@ export async function addStock(req: AuthRequest, res: Response) {
           // Update unit if provided and different
           if (entry.unit && entry.unit !== existingProduct.unit) {
             updateData.unit = entry.unit;
-            // Update piecesPerUnit based on new unit
-            if (entry.unit.toLowerCase() === 'pak' || entry.unit.toLowerCase() === 'pack') {
-              updateData.piecesPerUnit = 10;
-            } else if (entry.unit.toLowerCase() === 'reem') {
-              updateData.piecesPerUnit = 500;
-            } else {
-              updateData.piecesPerUnit = 1;
-            }
+            updateData.piecesPerUnit = 1;
+          }
+          // Update category if provided
+          if (entry.category && entry.category.trim()) {
+            updateData.category = entry.category.trim();
           }
           await tx.product.update({
             where: { id: productId },
@@ -224,6 +201,62 @@ export async function adjustStock(req: AuthRequest, res: Response) {
     res.status(201).json(result);
   } catch (error: any) {
     console.error('Adjust stock error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+export async function getStockReconciliation(req: AuthRequest, res: Response) {
+  try {
+    const [products, entriesIn, adjustments, salesOut] = await Promise.all([
+      prisma.product.findMany(),
+      prisma.stockEntry.groupBy({
+        by: ['productId'],
+        _sum: { quantity: true },
+      }),
+      prisma.stockAdjustment.groupBy({
+        by: ['productId'],
+        _sum: { qtyChange: true },
+      }),
+      prisma.saleItem.groupBy({
+        by: ['productId'],
+        _sum: { quantity: true },
+      }),
+    ]);
+
+    const entryMap = new Map(entriesIn.map(e => [e.productId, e._sum.quantity || 0]));
+    const adjustmentMap = new Map(adjustments.map(a => [a.productId, a._sum.qtyChange || 0]));
+    const salesMap = new Map(salesOut.map(s => [s.productId, s._sum.quantity || 0]));
+
+    const rows = products
+      .map((product) => {
+        const purchasesIn = entryMap.get(product.id) || 0;
+        const adjustmentsNet = adjustmentMap.get(product.id) || 0;
+        const salesOutTotal = salesMap.get(product.id) || 0;
+        const expectedStock = purchasesIn + adjustmentsNet - salesOutTotal;
+        const actualStock = product.stockQty;
+        const discrepancy = expectedStock - actualStock;
+        return {
+          productId: product.id,
+          productName: product.name,
+          unit: product.unit,
+          purchasesIn,
+          adjustmentsNet,
+          salesOut: salesOutTotal,
+          expectedStock,
+          actualStock,
+          discrepancy,
+          status: discrepancy === 0 ? 'OK' : 'DISCREPANCY',
+        };
+      })
+      .sort((a, b) => Math.abs(b.discrepancy) - Math.abs(a.discrepancy));
+
+    res.json({
+      totalProducts: rows.length,
+      productsWithDiscrepancy: rows.filter(r => r.discrepancy !== 0).length,
+      rows,
+    });
+  } catch (error: any) {
+    console.error('Stock reconciliation error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }

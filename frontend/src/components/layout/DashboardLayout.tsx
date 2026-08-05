@@ -66,6 +66,8 @@ const adminMenuCategories: MenuCategory[] = [
       { name: 'Today Sales', href: '/sales/today', icon: FileText },
       { name: 'Payment Received', href: '/payments', icon: CreditCard },
       { name: 'Credit Users', href: '/companies', icon: Building2 },
+      { name: 'Sales Adjustments', href: '/sales/adjustments', icon: FileText },
+      { name: 'Adjustment Approvals', href: '/sales/adjustments/approvals', icon: FileText, roles: ['ADMIN'] },
     ]
   },
   {
@@ -125,6 +127,7 @@ const salesMenuCategories: MenuCategory[] = [
       { name: 'Sales List', href: '/sales' },
       { name: 'Payments Received', href: '/payments' },
       { name: 'Daily Summary', href: '/daily-summary' },
+      { name: 'Sales Adjustments', href: '/sales/adjustments' },
     ]
   },
   {
@@ -314,11 +317,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Page content */}
         <main className="p-3 sm:p-4 md:p-6 relative min-h-screen pb-20">{children}</main>
-        {/* Easy Tech Branding - Hidden on mobile, non-blocking */}
-        <div className="hidden md:block fixed bottom-4 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-4 z-[5] pointer-events-none select-none opacity-60 hover:opacity-100 transition-opacity">
+        {/* EnglesTech Branding - Hidden on mobile, non-blocking */}
+        <div className="hidden lg:block fixed bottom-4 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-4 z-[5] pointer-events-none select-none opacity-60 hover:opacity-100 transition-opacity">
           <div className="bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow border border-gray-200">
             <p className="text-sm font-bold" style={{ color: '#1921D9' }}>
-              Easy Tech
+              EnglesTech
             </p>
             <p className="text-[10px] text-gray-500">Powered by</p>
           </div>

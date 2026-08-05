@@ -51,6 +51,7 @@ export default function AddStockPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [productSearch, setProductSearch] = useState<{ [key: number]: string }>({});
   const [showProductDropdown, setShowProductDropdown] = useState<{ [key: number]: boolean }>({});
+  const [categoryErrors, setCategoryErrors] = useState<{ [key: number]: string }>({});
   const productDropdownRef = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   useEffect(() => {
@@ -107,6 +108,9 @@ export default function AddStockPage() {
     const updated = [...entries];
     updated[index] = { ...updated[index], ...updates };
     setEntries(updated);
+    if (updates.category) {
+      setCategoryErrors((prev) => ({ ...prev, [index]: '' }));
+    }
   };
 
   const removeEntry = (index: number) => {
@@ -134,6 +138,25 @@ export default function AddStockPage() {
       const validEntries = cleanedEntries.filter(entry => entry.productName || entry.productId);
       if (validEntries.length === 0) {
         alert('Please add at least one product');
+        setLoading(false);
+        return;
+      }
+
+      // Validate category on every valid entry
+      const missingCategoryIndexes: number[] = [];
+      entries.forEach((entry, index) => {
+        if ((entry.productName || entry.productId) && !entry.category?.trim()) {
+          missingCategoryIndexes.push(index);
+        }
+      });
+
+      if (missingCategoryIndexes.length > 0) {
+        const newErrors: { [key: number]: string } = {};
+        missingCategoryIndexes.forEach((i) => {
+          newErrors[i] = 'Category is required.';
+        });
+        setCategoryErrors(newErrors);
+        alert(missingCategoryIndexes.length === 1 ? 'Category is required.' : 'Category is required for all entries.');
         setLoading(false);
         return;
       }
@@ -243,7 +266,7 @@ export default function AddStockPage() {
                       )}
                     </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Category *</label>
                     {showNewCategoryInput[index] ? (
                       <div className="flex gap-1">
                         <input
@@ -251,6 +274,7 @@ export default function AddStockPage() {
                           value={newCategoryName[index] || ''}
                           onChange={(e) => {
                             setNewCategoryName({ ...newCategoryName, [index]: e.target.value });
+                            setCategoryErrors((prev) => ({ ...prev, [index]: '' }));
                           }}
                           className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
                           placeholder="New category name"
@@ -297,9 +321,15 @@ export default function AddStockPage() {
                               setShowNewCategoryInput({ ...showNewCategoryInput, [index]: true });
                             } else {
                               updateEntry(index, { category: e.target.value || undefined });
+                              if (!e.target.value) {
+                                setCategoryErrors((prev) => ({ ...prev, [index]: 'Category is required.' }));
+                              }
                             }
                           }}
-                          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                          className={`flex-1 px-2 py-1 text-sm border rounded ${
+                            categoryErrors[index] ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                          required
                         >
                           <option value="">Select category</option>
                           {categories.map((cat) => (
@@ -310,6 +340,9 @@ export default function AddStockPage() {
                           <option value="__new__">+ Create New Category</option>
                         </select>
                       </div>
+                    )}
+                    {categoryErrors[index] && (
+                      <p className="text-xs text-red-600 mt-1">{categoryErrors[index]}</p>
                     )}
                   </div>
                   <div>

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import authRoutes from './routes/auth.routes';
 import salesRoutes from './routes/sales.routes';
+import salesAdjustmentsRoutes from './routes/sales-adjustments.routes';
 import companiesRoutes from './routes/companies.routes';
 import contactsRoutes from './routes/contacts.routes';
 import stockRoutes from './routes/stock.routes';
@@ -41,6 +42,7 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/sales', salesRoutes);
+app.use('/api/sales-adjustments', salesAdjustmentsRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/contacts', contactsRoutes);
 app.use('/api/stock', stockRoutes);

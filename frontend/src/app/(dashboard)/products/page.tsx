@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import { Search, Edit, Package } from 'lucide-react';
+import { Search, Edit, Package, ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
@@ -17,6 +17,19 @@ interface Product {
   lowStockAlert: number;
 }
 
+interface ReconcileRow {
+  productId: string;
+  productName: string;
+  unit: string | null;
+  purchasesIn: number;
+  adjustmentsNet: number;
+  salesOut: number;
+  expectedStock: number;
+  actualStock: number;
+  discrepancy: number;
+  status: string;
+}
+
 export default function ProductsPage() {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,6 +37,13 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [categories, setCategories] = useState<string[]>([]);
+
+  const [reconcileOpen, setReconcileOpen] = useState(false);
+  const [reconcileData, setReconcileData] = useState<ReconcileRow[] | null>(null);
+  const [reconcileMeta, setReconcileMeta] = useState<{ totalProducts: number; productsWithDiscrepancy: number } | null>(null);
+  const [reconcileLoading, setReconcileLoading] = useState(false);
+
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     fetchProducts();
@@ -53,6 +73,28 @@ export default function ProductsPage() {
     }
   };
 
+  const toggleReconcile = async () => {
+    if (reconcileOpen) {
+      setReconcileOpen(false);
+      return;
+    }
+    setReconcileOpen(true);
+    if (reconcileData) return;
+    setReconcileLoading(true);
+    try {
+      const response = await api.get('/api/stock/reconcile');
+      setReconcileData(response.data.rows);
+      setReconcileMeta({
+        totalProducts: response.data.totalProducts,
+        productsWithDiscrepancy: response.data.productsWithDiscrepancy,
+      });
+    } catch (error) {
+      console.error('Failed to fetch reconciliation:', error);
+    } finally {
+      setReconcileLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
   }, [selectedCategory]);
@@ -70,6 +112,82 @@ export default function ProductsPage() {
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">Products</h1>
         <p className="text-sm md:text-base text-gray-600 mt-1">View all products and stock levels</p>
       </div>
+
+      {isAdmin && (
+        <div className="bg-white rounded-lg shadow">
+          <button
+            onClick={toggleReconcile}
+            className="w-full flex items-center justify-between px-4 py-3 text-left"
+          >
+            <div className="flex items-center">
+              {reconcileOpen ? (
+                <ChevronDown className="h-5 w-5 mr-2 text-gray-500" />
+              ) : (
+                <ChevronRight className="h-5 w-5 mr-2 text-gray-500" />
+              )}
+              <span className="font-medium text-gray-800">Inventory Reconciliation</span>
+              {reconcileMeta && reconcileMeta.productsWithDiscrepancy > 0 && (
+                <span className="ml-3 flex items-center px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                  <AlertTriangle className="h-3 w-3 mr-1" />
+                  {reconcileMeta.productsWithDiscrepancy} discrepancy(ies)
+                </span>
+              )}
+              {reconcileMeta && reconcileMeta.productsWithDiscrepancy === 0 && (
+                <span className="ml-3 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                  In balance
+                </span>
+              )}
+            </div>
+          </button>
+
+          {reconcileOpen && (
+            <div className="px-4 pb-4">
+              <p className="text-xs text-gray-500 mb-3">
+                Expected stock = Purchases + Adjustments − Sales. Verified against the recorded stock balance.
+              </p>
+              {reconcileLoading && <p className="text-gray-500 text-sm">Loading reconciliation...</p>}
+              {!reconcileLoading && reconcileData && (
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                  {reconcileData.length === 0 && (
+                    <p className="text-sm text-gray-500">No products found.</p>
+                  )}
+                  <div className="grid grid-cols-5 gap-2 text-xs font-semibold text-gray-500 uppercase px-2">
+                    <div>Product</div>
+                    <div>Purchases</div>
+                    <div>Adjustments</div>
+                    <div>Sales</div>
+                    <div>Balance</div>
+                  </div>
+                  {reconcileData.map((row) => (
+                    <div
+                      key={row.productId}
+                      className={`grid grid-cols-1 md:grid-cols-5 gap-2 items-center px-2 py-2 rounded ${
+                        row.discrepancy !== 0 ? 'bg-red-50' : 'bg-gray-50'
+                      }`}
+                    >
+                      <div>
+                        <span className="font-medium text-sm">{row.productName}</span>
+                        {row.discrepancy !== 0 && (
+                          <span className="ml-2 text-xs text-red-600 font-semibold">
+                            mismatch {row.discrepancy > 0 ? '+' : ''}{row.discrepancy}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm">{row.purchasesIn}</div>
+                      <div className="text-sm">{row.adjustmentsNet}</div>
+                      <div className="text-sm">-{row.salesOut}</div>
+                      <div className="text-sm">
+                        <span className="font-medium">{row.actualStock}</span>
+                        <span className="text-gray-400 text-xs"> (expected {row.expectedStock})</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow">
         <div className="p-4 border-b border-gray-200 space-y-3">

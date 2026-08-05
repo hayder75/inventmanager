@@ -53,11 +53,15 @@ export async function createProduct(req: AuthRequest, res: Response) {
       return res.status(400).json({ error: 'Product name is required' });
     }
 
+    if (!category || !category.trim()) {
+      return res.status(400).json({ error: 'Category is required.' });
+    }
+
     const product = await prisma.product.create({
       data: {
         name,
         code: code || null,
-        category: category || null,
+        category: category.trim(),
         unit: unit || 'pcs',
         piecesPerUnit: piecesPerUnit || 1,
         costPrice: new Decimal(costPrice || 0),
